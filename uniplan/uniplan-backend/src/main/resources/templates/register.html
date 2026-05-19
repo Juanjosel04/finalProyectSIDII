@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <title>UniPlan — Crear cuenta</title>
+
+    <!-- Google Fonts -->
+    <link
+            href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+            rel="stylesheet"
+    >
+
+    <link
+            rel="stylesheet"
+            href="/css/register-style.css"
+    >
+
+</head>
+
+<body>
+
+<!-- AUTH SESSION CHECK -->
+<script>
+
+    const token =
+        sessionStorage.getItem("token");
+
+    const role =
+        sessionStorage.getItem("role");
+
+
+
+    if (token && role) {
+
+        if (role === "ADMIN") {
+
+            window.location.href =
+                "/admin/home";
+        }
+
+        else if (role === "ORGANIZER") {
+
+            window.location.href =
+                "/organizer/home";
+        }
+
+        else {
+
+            window.location.href =
+                "/student/home";
+        }
+    }
+
+</script>
+
+<!-- Fondo -->
+<div class="bg-layer"></div>
+
+<!-- Luces -->
+<div class="ambient-light light-1"></div>
+<div class="ambient-light light-2"></div>
+<div class="ambient-light light-3"></div>
+
+<!-- Overlay -->
+<div class="depth-gradient"></div>
+
+
+
+<div class="register-container">
+
+    <div class="glass-card">
+
+        <!-- Efectos -->
+        <div class="card-reflection"></div>
+
+        <div class="card-glow-border"></div>
+
+
+
+        <!-- Header -->
+        <div class="card-header">
+
+            <div class="brand-header-row">
+
+                <h1 class="main-title">
+                    UniPlan
+                </h1>
+
+                <img
+                        src="/images/logoIcesi.png"
+                        alt="Icesi"
+                        class="icesi-logo"
+                >
+
+            </div>
+
+            <p class="subtitle">
+                Crea tu cuenta en la plataforma universitaria
+            </p>
+
+        </div>
+
+
+
+        <!-- FORM -->
+        <form id="registerForm">
+
+            <!-- EMAIL -->
+            <div class="input-group">
+
+                <label for="email">
+                    Correo electrónico
+                </label>
+
+                <div class="input-field">
+
+                    <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="tu@universidad.edu"
+                            autocomplete="email"
+                            required
+                    >
+
+                    <span class="input-focus-line"></span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PASSWORD -->
+            <div class="input-group">
+
+                <label for="password">
+                    Contraseña
+                </label>
+
+                <div class="input-field">
+
+                    <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="••••••••"
+                            autocomplete="new-password"
+                            required
+                    >
+
+                    <span class="input-focus-line"></span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ROLE -->
+            <div class="input-group">
+
+                <label for="role">
+                    Rol en la plataforma
+                </label>
+
+                <div class="input-field">
+
+                    <select
+                            id="role"
+                            name="role"
+                            required
+                    >
+
+                        <option
+                                value=""
+                                disabled
+                                selected
+                        >
+                            Selecciona tu rol
+                        </option>
+
+                        <option value="STUDENT">
+                            Estudiante
+                        </option>
+
+                        <option value="ADMIN">
+                            Administrador
+                        </option>
+
+                        <option value="ORGANIZER">
+                            Organizador
+                        </option>
+
+                    </select>
+
+                    <span class="input-focus-line"></span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- STUDENT ID -->
+            <div
+                    class="input-group"
+                    id="studentIdGroup"
+                    style="display: none;"
+            >
+
+                <label for="studentId">
+                    ID de estudiante
+                </label>
+
+                <div class="input-field">
+
+                    <input
+                            type="text"
+                            id="studentId"
+                            name="studentId"
+                            placeholder="Ej: EST001"
+                    >
+
+                    <span class="input-focus-line"></span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- EMPLOYEE ID -->
+            <div
+                    class="input-group"
+                    id="employeeIdGroup"
+                    style="display: none;"
+            >
+
+                <label for="employeeId">
+                    ID de empleado
+                </label>
+
+                <div class="input-field">
+
+                    <input
+                            type="text"
+                            id="employeeId"
+                            name="employeeId"
+                            placeholder="Ej: EMP001"
+                    >
+
+                    <span class="input-focus-line"></span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- BUTTON -->
+            <button
+                    type="submit"
+                    class="register-button"
+            >
+
+                <span>
+                    Crear cuenta
+                </span>
+
+                <svg
+                        class="button-icon"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                >
+
+                    <path
+                            d="M5 12H19M19 12L13 6M19 12L13 18"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                    />
+
+                </svg>
+
+            </button>
+
+
+
+            <!-- MENSAJE SOLO SI HAY ERROR -->
+            <div
+                    id="message"
+                    style="display: none;"
+            ></div>
+
+        </form>
+
+
+
+        <!-- Divider -->
+        <div class="divider">
+
+            <span></span>
+
+        </div>
+
+
+
+        <!-- LOGIN LINK -->
+        <div class="login-section">
+
+            <span class="login-text">
+                ¿Ya tienes cuenta?
+            </span>
+
+            <a
+                    href="/login"
+                    class="login-link"
+            >
+                Iniciar sesión →
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- SCRIPT -->
+<script>
+
+    document.addEventListener(
+            'DOMContentLoaded',
+            function () {
+
+                const roleSelect =
+                    document.getElementById('role');
+
+                const studentIdGroup =
+                    document.getElementById('studentIdGroup');
+
+                const employeeIdGroup =
+                    document.getElementById('employeeIdGroup');
+
+
+
+                if (roleSelect) {
+
+                    roleSelect.addEventListener(
+                            'change',
+                            function () {
+
+                                const selectedRole =
+                                    this.value;
+
+
+
+                                studentIdGroup.style.display = 'none';
+
+                                employeeIdGroup.style.display = 'none';
+
+
+
+                                if (
+                                    selectedRole === 'STUDENT'
+                                ) {
+
+                                    studentIdGroup.style.display =
+                                        'block';
+                                }
+
+                                else if (
+                                    selectedRole === 'ADMIN'
+                                    ||
+                                    selectedRole === 'ORGANIZER'
+                                ) {
+
+                                    employeeIdGroup.style.display =
+                                        'block';
+                                }
+                            }
+                    );
+                }
+            }
+    );
+
+</script>
+
+
+
+<script src="/js/auth.js"></script>
+
+</body>
+</html>

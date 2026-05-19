@@ -1,0 +1,501 @@
+/* ===== RESET & BASE ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* ===== SCROLLBAR ELEGANTE ===== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.8);
+}
+
+/* ===== FONDO CON IMAGEN ===== */
+.bg-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('../images/background.jpg') center center / cover no-repeat;
+    z-index: 0;
+}
+
+/* Gradiente de profundidad */
+.depth-gradient {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6));
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* ===== LUCES AMBIENTALES PREMIUM ===== */
+.ambient-light {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.4;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.light-1 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(0, 120, 255, 0.4), transparent);
+    top: -200px;
+    right: -100px;
+}
+
+.light-2 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(100, 80, 255, 0.3), transparent);
+    bottom: -250px;
+    left: -150px;
+}
+
+.light-3 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0, 200, 255, 0.25), transparent);
+    top: 40%;
+    left: 60%;
+}
+
+/* ===== CONTENEDOR PRINCIPAL CON SCROLL ===== */
+.register-container {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+}
+
+/* ===== LIQUID GLASS CARD ===== */
+.glass-card {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    background: rgba(10, 15, 25, 0.55);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 32px;
+    padding: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 
+                0 0 0 0.5px rgba(255, 255, 255, 0.05) inset;
+    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1), 
+                box-shadow 0.4s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Scroll personalizado dentro de la card */
+.glass-card::-webkit-scrollbar {
+    width: 5px;
+}
+
+.glass-card::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.glass-card::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.4);
+    border-radius: 10px;
+}
+
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.6), 
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* Reflection estilo Apple */
+.card-reflection {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.15) 0%, 
+                rgba(255, 255, 255, 0.02) 40%, 
+                rgba(255, 255, 255, 0) 60%);
+    border-radius: 32px;
+    pointer-events: none;
+}
+
+/* Borde con glow sutil */
+.card-glow-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 32px;
+    background: linear-gradient(120deg, 
+                rgba(255, 255, 255, 0.2) 0%, 
+                rgba(255, 255, 255, 0) 30%, 
+                rgba(255, 255, 255, 0) 70%, 
+                rgba(255, 255, 255, 0.1) 100%);
+    pointer-events: none;
+}
+
+/* ===== HEADER ===== */
+.card-header {
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.brand-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.main-title {
+    font-size: 2.2rem;        /* Tamaño ajustado */
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff, #dbeafe);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.icesi-logo {
+    height: 47px;             /* Tamaño ajustado */
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    opacity: 0.9;
+    transition: opacity 0.2s ease;
+}
+
+.icesi-logo:hover {
+    opacity: 1;
+}
+
+.subtitle {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 400;
+    margin-top: 0.25rem;
+}
+
+/* ===== INPUTS MODERNOS ===== */
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.5rem;
+}
+
+.input-field {
+    position: relative;
+}
+
+.input-field input,
+.input-field select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+    outline: none;
+    cursor: pointer;
+}
+
+.input-field select option {
+    background: rgba(10, 15, 25, 0.95);
+    color: white;
+}
+
+.input-field input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+    font-weight: 400;
+}
+
+.input-field input:focus,
+.input-field select:focus {
+    border-color: rgba(59, 130, 246, 0.6);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.input-focus-line {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #3b82f6, #60a5fa, transparent);
+    transition: all 0.4s ease;
+    border-radius: 2px;
+}
+
+.input-field input:focus ~ .input-focus-line,
+.input-field select:focus ~ .input-focus-line {
+    width: 80%;
+    left: 10%;
+}
+
+/* ===== BOTÓN PREMIUM ===== */
+.register-button {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.9));
+    border: none;
+    border-radius: 16px;
+    padding: 0.875rem;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    position: relative;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.register-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.register-button:hover::before {
+    left: 100%;
+}
+
+.register-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 1), rgba(37, 99, 235, 1));
+}
+
+.register-button:active {
+    transform: translateY(0);
+}
+
+.button-icon {
+    transition: transform 0.2s ease;
+}
+
+.register-button:hover .button-icon {
+    transform: translateX(4px);
+}
+
+/* ===== MENSAJE DE RESPUESTA ===== */
+#message {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    color: #fca5a5;
+}
+
+/* ===== DIVIDER ===== */
+.divider {
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+.divider span {
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2), transparent);
+}
+
+/* ===== SECCIÓN LOGIN ===== */
+.login-section {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.login-text {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.login-link {
+    color: #60a5fa;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.login-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, #60a5fa, transparent);
+    transition: width 0.3s ease;
+}
+
+.login-link:hover {
+    color: #93c5fd;
+}
+
+.login-link:hover::after {
+    width: 100%;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 640px) {
+    .glass-card {
+        padding: 1.75rem;
+        border-radius: 28px;
+        max-height: 85vh;
+    }
+    
+    .main-title {
+        font-size: 1.8rem;
+    }
+    
+    .icesi-logo {
+        height: 38px;
+    }
+}
+
+@media (max-width: 480px) {
+    .register-container {
+        padding: 1rem;
+    }
+    
+    .glass-card {
+        padding: 1.5rem;
+        border-radius: 24px;
+        max-height: 95vh;
+    }
+    
+    .main-title {
+        font-size: 1.6rem;
+    }
+    
+    .icesi-logo {
+        height: 34px;
+    }
+    
+    .subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .input-field input,
+    .input-field select {
+        padding: 0.75rem 1rem;
+    }
+    
+    .register-button {
+        padding: 0.75rem;
+    }
+    
+    .login-section {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .glass-card {
+        padding: 1.25rem;
+    }
+    
+    .main-title {
+        font-size: 1.4rem;
+    }
+    
+    .icesi-logo {
+        height: 30px;
+    }
+}
+
+/* ===== EFECTOS DE CARGA SUAVE ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.glass-card {
+    animation: fadeInUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+}
+
+/* ===== MEJORAS DE ACCESIBILIDAD ===== */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+select:-webkit-autofill {
+    -webkit-text-fill-color: white;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(10, 15, 25, 0.8) inset;
+    transition: background-color 5000s ease-in-out 0s;
+}

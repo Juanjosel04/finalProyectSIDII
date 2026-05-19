@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <title>
+        UniPlan — Crear Evento
+    </title>
+
+    <!-- Google Fonts -->
+    <link
+            href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+            rel="stylesheet"
+    >
+
+    <link
+            rel="stylesheet"
+            href="/css/create-event-style.css"
+    >
+
+</head>
+
+<body style="display: none;">
+
+<!-- AUTH GUARD -->
+<script>
+
+    const token =
+        sessionStorage.getItem("token");
+
+    const role =
+        sessionStorage.getItem("role");
+
+
+
+    if (
+        !token ||
+        (
+            role !== "ADMIN" &&
+            role !== "ORGANIZER"
+        )
+    ) {
+
+        window.location.href =
+            "/login";
+    }
+
+    else {
+
+        document.body.style.display =
+            "block";
+    }
+
+</script>
+
+
+
+<!-- BACKGROUND -->
+<div class="bg-image-layer"></div>
+
+<div class="bg-overlay-dark"></div>
+
+
+
+<!-- LIGHTS -->
+<div class="ambient-light light-1"></div>
+
+<div class="ambient-light light-2"></div>
+
+
+
+<!-- NAVBAR -->
+<nav class="navbar">
+
+    <div class="nav-container">
+
+        <a
+                href="/admin/home"
+                class="nav-brand"
+        >
+
+            <h2 class="brand-title">
+                UniPlan
+            </h2>
+
+            <img
+                    src="/images/logoIcesi.png"
+                    alt="Logo Icesi"
+                    class="nav-logo"
+            >
+
+        </a>
+
+
+
+        <div class="nav-user">
+
+            <span class="user-role">
+                Crear Evento
+            </span>
+
+            <button
+                    class="logout-btn"
+                    onclick="logout()"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+
+<!-- MAIN -->
+<main class="create-event-container">
+
+    <div class="event-form-card">
+
+        <!-- HEADER -->
+        <div class="form-header">
+
+            <h1>
+                Registrar Evento
+            </h1>
+
+            <p>
+                Crea y publica nuevos eventos universitarios en UniPlan.
+            </p>
+
+        </div>
+
+
+
+        <!-- FORM -->
+        <form id="createEventForm">
+
+            <!-- ROW -->
+            <div class="form-row">
+
+                <!-- TITLE -->
+                <div class="input-group">
+
+                    <label for="title">
+                        Título del evento
+                    </label>
+
+                    <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            placeholder="Ej: Hackathon UniPlan 2026"
+                            required
+                    >
+
+                </div>
+
+
+
+                <!-- TYPE -->
+                <div class="input-group">
+
+                    <label for="type">
+                        Tipo de evento
+                    </label>
+
+                    <select
+                            id="type"
+                            name="type"
+                            required
+                    >
+
+                        <option value="">
+                            Selecciona un tipo
+                        </option>
+
+                        <option value="WORKSHOP">
+                            Taller
+                        </option>
+
+                        <option value="TALK">
+                            Charla
+                        </option>
+
+                        <option value="TOURNAMENT">
+                            Torneo
+                        </option>
+
+                        <option value="VOLUNTEER">
+                            Voluntariado
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- DESCRIPTION -->
+            <div class="input-group">
+
+                <label for="description">
+                    Descripción
+                </label>
+
+                <textarea
+                        id="description"
+                        name="description"
+                        rows="5"
+                        placeholder="Describe el evento..."
+                        required
+                ></textarea>
+
+            </div>
+
+
+
+            <!-- ROW -->
+            <div class="form-row">
+
+                <!-- LOCATION -->
+                <div class="input-group">
+
+                    <label for="location">
+                        Ubicación
+                    </label>
+
+                    <input
+                            type="text"
+                            id="location"
+                            name="location"
+                            placeholder="Ej: Auditorio Principal"
+                            required
+                    >
+
+                </div>
+
+
+
+                <!-- CAPACITY -->
+                <div class="input-group">
+
+                    <label for="capacity">
+                        Capacidad
+                    </label>
+
+                    <input
+                            type="number"
+                            id="capacity"
+                            name="capacity"
+                            min="1"
+                            placeholder="Ej: 120"
+                            required
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ROW -->
+            <div class="form-row">
+
+                <!-- START DATE -->
+                <div class="input-group">
+
+                    <label for="startDate">
+                        Fecha de inicio
+                    </label>
+
+                    <input
+                            type="datetime-local"
+                            id="startDate"
+                            name="startDate"
+                            required
+                    >
+
+                </div>
+
+
+
+                <!-- END DATE -->
+                <div class="input-group">
+
+                    <label for="endDate">
+                        Fecha de finalización
+                    </label>
+
+                    <input
+                            type="datetime-local"
+                            id="endDate"
+                            name="endDate"
+                            required
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- TAGS -->
+            <div class="input-group">
+
+                <label for="tags">
+                    Tags
+                </label>
+
+                <input
+                        type="text"
+                        id="tags"
+                        name="tags"
+                        placeholder="Ej: tecnologia, ia, spring"
+                >
+
+            </div>
+
+
+
+            <!-- METADATA -->
+            <div class="input-group">
+
+                <label for="metadata">
+                    Metadata JSON
+                </label>
+
+                <textarea
+                        id="metadata"
+                        name="metadata"
+                        rows="4"
+                        placeholder='Ej: {"speaker":"Carlos","level":"Advanced"}'
+                ></textarea>
+
+            </div>
+
+
+
+            <!-- BUTTON -->
+            <button
+                    type="submit"
+                    class="create-event-btn"
+            >
+
+                <span>
+                    Crear Evento
+                </span>
+
+                <span>
+                    →
+                </span>
+
+            </button>
+
+
+
+            <!-- MESSAGE -->
+            <div
+                    id="message"
+                    style="display: none;"
+            ></div>
+
+        </form>
+
+    </div>
+
+</main>
+
+
+
+<script src="/js/auth.js"></script>
+
+</body>
+</html>
