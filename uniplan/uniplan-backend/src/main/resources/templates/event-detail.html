@@ -11,9 +11,11 @@
 <body style="display:none;">
 
 <script>
-    const token = sessionStorage.getItem("token");
-    if (!token) { window.location.href = "/login"; }
-    else { document.body.style.display = "block"; }
+    (function () {
+        const token = sessionStorage.getItem("token");
+        if (!token) { window.location.href = "/login"; }
+        else { document.body.style.display = "block"; }
+    })();
 </script>
 
 <div class="bg-image-layer"></div>

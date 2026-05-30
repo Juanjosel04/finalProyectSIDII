@@ -11,13 +11,15 @@
 <body style="display:none;">
 
 <script>
-    const token = sessionStorage.getItem("token");
-    const role  = sessionStorage.getItem("role");
-    if (!token || role !== "STUDENT") {
-        window.location.href = "/login";
-    } else {
-        document.body.style.display = "block";
-    }
+    (function () {
+        const token = sessionStorage.getItem("token");
+        const role  = sessionStorage.getItem("role");
+        if (!token || role !== "STUDENT") {
+            window.location.href = "/login";
+        } else {
+            document.body.style.display = "block";
+        }
+    })();
 </script>
 
 <div class="bg-image-layer"></div>
