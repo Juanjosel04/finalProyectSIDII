@@ -103,7 +103,7 @@ public class AuthService {
         );
     }
 
-    private void validateCommonRegisterData(String email, String password, String role) {
+    private void  validateCommonRegisterData(String email, String password, String role) {
 
         if (isBlank(email)) {
             throw new IllegalArgumentException("El correo institucional es obligatorio");

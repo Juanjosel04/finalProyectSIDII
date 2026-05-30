@@ -3,19 +3,13 @@ package com.uniplan.uniplan_backend.model.document.embedded;
 import lombok.*;
 
 import org.springframework.data.annotation.Id;
-
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-
-import java.util.List;
-
 import java.util.Map;
 
-
-
 @Document(collection = "events")
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,89 +20,64 @@ public class Event {
     @Id
     private String id;
 
-
+    /*
+     * Human-readable unique code
+     * Example: EVT-2025-001
+     */
+    @Indexed(unique = true, sparse = true)
+    private String code;
 
     /*
      * Basic info
      */
-
     private String title;
 
     private String description;
 
+    /*
+     * ACADEMIC | CULTURAL | SPORT | VOLUNTEER | WORKSHOP | OTHER
+     */
     private String type;
 
-
-
     /*
-     * Event location
+     * ACTIVE | CANCELLED | FINISHED | DRAFT
      */
-
-    private String location;
-
-
-
-    /*
-     * Event capacity
-     */
-
-    private Integer capacity;
-
-
-
-    /*
-     * Dates
-     */
-
-    private LocalDateTime startDate;
-
-    private LocalDateTime endDate;
-
-
-
-    /*
-     * Organizer
-     */
-
-    private String organizerId;
-
-
-
-    /*
-     * ACTIVE
-     * CANCELLED
-     * FINISHED
-     */
-
     private String status;
 
+    /*
+     * Date/time info
+     */
+    private EventSchedule schedule;
 
+    /*
+     * Location info
+     */
+    private EventLocation location;
+
+    /*
+     * Capacity and registration counters
+     */
+    private EventCapacity capacity;
+
+    /*
+     * Organizer snapshot (denormalized for read performance)
+     */
+    private EventOrganizer organizer;
+
+    /*
+     * Flexible extra info
+     * Examples:
+     *   speaker: "Jane Doe"
+     *   requirements: "Laptop"
+     *   volunteerHours: 2
+     *   tags: ["AI", "tecnología"]
+     */
+    private Map<String, Object> details;
 
     /*
      * Audit
      */
-
     private LocalDateTime createdAt;
 
-
-
-    /*
-     * Tags
-     */
-
-    private List<String> tags;
-
-
-
-    /*
-     * Flexible metadata
-     *
-     * Examples:
-     * speaker
-     * sport
-     * hours
-     * requirements
-     */
-
-    private Map<String, Object> metadata;
+    private LocalDateTime updatedAt;
 }

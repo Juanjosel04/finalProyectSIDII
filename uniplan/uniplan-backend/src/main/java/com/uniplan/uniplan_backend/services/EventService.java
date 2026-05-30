@@ -1,28 +1,17 @@
 package com.uniplan.uniplan_backend.services;
 
 import com.uniplan.uniplan_backend.dto.CreateEventRequest;
-
 import com.uniplan.uniplan_backend.dto.EventListResponse;
-
 import com.uniplan.uniplan_backend.dto.EventResponse;
-
 import com.uniplan.uniplan_backend.model.document.embedded.Event;
-
+import com.uniplan.uniplan_backend.model.document.embedded.EventCapacity;
 import com.uniplan.uniplan_backend.repositories.EventRepository;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-
-import java.util.ArrayList;
-
 import java.util.List;
-
 import java.util.stream.Collectors;
-
-
 
 @Service
 @RequiredArgsConstructor
@@ -30,82 +19,46 @@ public class EventService {
 
     private final EventRepository eventRepository;
 
-
-
     /*
      * =========================================================
      * CREATE EVENT
      * =========================================================
      */
 
-    public EventResponse createEvent(
-            CreateEventRequest request
-    ) {
+    public EventResponse createEvent(CreateEventRequest request) {
+
+        // Initialize available = total when creating
+        EventCapacity capacity = request.getCapacity();
+        if (capacity != null && capacity.getAvailable() == null) {
+            capacity.setAvailable(capacity.getTotal());
+            capacity.setRegistered(0);
+            capacity.setWaitlist(0);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
 
         Event event = Event.builder()
-
-                .title(
-                        request.getTitle()
-                )
-
-                .description(
-                        request.getDescription()
-                )
-
-                .type(
-                        request.getType()
-                )
-
-                .location(
-                        request.getLocation()
-                )
-
-                .capacity(
-                        request.getCapacity()
-                )
-
-                .startDate(
-                        request.getStartDate()
-                )
-
-                .endDate(
-                        request.getEndDate()
-                )
-
-                .tags(
-                        request.getTags()
-                )
-
-                .metadata(
-                        request.getMetadata()
-                )
-
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .type(request.getType())
+                .schedule(request.getSchedule())
+                .location(request.getLocation())
+                .capacity(capacity)
+                .organizer(request.getOrganizer())
+                .details(request.getDetails())
                 .status("ACTIVE")
-
-                .createdAt(
-                        LocalDateTime.now()
-                )
-
+                .createdAt(now)
+                .updatedAt(now)
                 .build();
 
-
-
-        Event savedEvent =
-                eventRepository.save(event);
-
-
+        Event savedEvent = eventRepository.save(event);
 
         return new EventResponse(
-
                 savedEvent.getId(),
-
                 savedEvent.getTitle(),
-
                 savedEvent.getStatus()
         );
     }
-
-
 
     /*
      * =========================================================
@@ -114,142 +67,33 @@ public class EventService {
      */
 
     public List<EventListResponse> getAllEvents() {
-
-        return eventRepository
-
-                .findAll()
-
+        return eventRepository.findAll()
                 .stream()
-
                 .map(this::mapToListResponse)
-
                 .collect(Collectors.toList());
     }
-
-
 
     /*
      * =========================================================
      * SEARCH EVENTS
      * =========================================================
-     *
-     * Search by:
-     * - title
-     * - location
-     * - type
-     * - tags
-     *
+     * Searches: title, location.venue, type
      */
 
-    public List<EventListResponse> searchEvents(
-            String query
-    ) {
+    public List<EventListResponse> searchEvents(String query) {
 
-        String normalizedQuery =
-                query.toLowerCase();
+        String q = query.toLowerCase();
 
-
-
-        List<Event> allEvents =
-                eventRepository.findAll();
-
-
-
-        List<Event> filteredEvents =
-                allEvents.stream()
-
-                        .filter(event ->
-
-                                /*
-                                 * TITLE
-                                 */
-
-                                event.getTitle() != null
-
-                                        &&
-
-                                        event.getTitle()
-                                                .toLowerCase()
-                                                .contains(
-                                                        normalizedQuery
-                                                )
-
-
-
-                                        ||
-
-                                        /*
-                                         * LOCATION
-                                         */
-
-                                        event.getLocation() != null
-
-                                                &&
-
-                                                event.getLocation()
-                                                        .toLowerCase()
-                                                        .contains(
-                                                                normalizedQuery
-                                                        )
-
-
-
-                                        ||
-
-                                        /*
-                                         * TYPE
-                                         */
-
-                                        event.getType() != null
-
-                                                &&
-
-                                                event.getType()
-                                                        .toLowerCase()
-                                                        .contains(
-                                                                normalizedQuery
-                                                        )
-
-
-
-                                        ||
-
-                                        /*
-                                         * TAGS
-                                         */
-
-                                        event.getTags() != null
-
-                                                &&
-
-                                                event.getTags()
-
-                                                        .stream()
-
-                                                        .anyMatch(tag ->
-
-                                                                tag.toLowerCase()
-
-                                                                        .contains(
-                                                                                normalizedQuery
-                                                                        )
-                                                        )
-                        )
-
-                        .toList();
-
-
-
-        return filteredEvents
-
+        return eventRepository.findAll()
                 .stream()
-
+                .filter(event ->
+                        matchesText(event.getTitle(), q)
+                        || (event.getLocation() != null && matchesText(event.getLocation().getVenue(), q))
+                        || matchesText(event.getType(), q)
+                )
                 .map(this::mapToListResponse)
-
                 .collect(Collectors.toList());
     }
-
-
 
     /*
      * =========================================================
@@ -257,22 +101,12 @@ public class EventService {
      * =========================================================
      */
 
-    public List<EventListResponse> filterByType(
-            String type
-    ) {
-
-        return eventRepository
-
-                .findByType(type)
-
+    public List<EventListResponse> filterByType(String type) {
+        return eventRepository.findByType(type)
                 .stream()
-
                 .map(this::mapToListResponse)
-
                 .collect(Collectors.toList());
     }
-
-
 
     /*
      * =========================================================
@@ -280,22 +114,12 @@ public class EventService {
      * =========================================================
      */
 
-    public List<EventListResponse> filterByStatus(
-            String status
-    ) {
-
-        return eventRepository
-
-                .findByStatus(status)
-
+    public List<EventListResponse> filterByStatus(String status) {
+        return eventRepository.findByStatus(status)
                 .stream()
-
                 .map(this::mapToListResponse)
-
                 .collect(Collectors.toList());
     }
-
-
 
     /*
      * =========================================================
@@ -303,64 +127,27 @@ public class EventService {
      * =========================================================
      */
 
-    public Event getEventById(
-            String id
-    ) {
-
-        return eventRepository
-
-                .findById(id)
-
-                .orElseThrow(
-
-                        () -> new RuntimeException(
-                                "Event not found"
-                        )
-                );
+    public Event getEventById(String id) {
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event not found: " + id));
     }
-
-
 
     /*
      * =========================================================
-     * DELETE EVENT
+     * CANCEL EVENT (soft delete)
      * =========================================================
-     *
-     * Soft delete
-     *
      */
 
-    public EventResponse cancelEvent(
-            String id
-    ) {
+    public EventResponse cancelEvent(String id) {
 
-        Event event =
-                getEventById(id);
+        Event event = getEventById(id);
+        event.setStatus("CANCELLED");
+        event.setUpdatedAt(LocalDateTime.now());
 
+        Event updated = eventRepository.save(event);
 
-
-        event.setStatus(
-                "CANCELLED"
-        );
-
-
-
-        Event updatedEvent =
-                eventRepository.save(event);
-
-
-
-        return new EventResponse(
-
-                updatedEvent.getId(),
-
-                updatedEvent.getTitle(),
-
-                updatedEvent.getStatus()
-        );
+        return new EventResponse(updated.getId(), updated.getTitle(), updated.getStatus());
     }
-
-
 
     /*
      * =========================================================
@@ -368,114 +155,67 @@ public class EventService {
      * =========================================================
      */
 
-    public EventResponse updateEvent(
+    public EventResponse updateEvent(String id, CreateEventRequest request) {
 
-            String id,
+        Event event = getEventById(id);
 
-            CreateEventRequest request
-    ) {
+        event.setTitle(request.getTitle());
+        event.setDescription(request.getDescription());
+        event.setType(request.getType());
+        event.setSchedule(request.getSchedule());
+        event.setLocation(request.getLocation());
+        event.setCapacity(request.getCapacity());
+        event.setOrganizer(request.getOrganizer());
+        event.setDetails(request.getDetails());
+        event.setUpdatedAt(LocalDateTime.now());
 
-        Event event =
-                getEventById(id);
+        Event updated = eventRepository.save(event);
 
-
-
-        event.setTitle(
-                request.getTitle()
-        );
-
-
-
-        event.setDescription(
-                request.getDescription()
-        );
-
-
-
-        event.setType(
-                request.getType()
-        );
-
-
-
-        event.setLocation(
-                request.getLocation()
-        );
-
-
-
-        event.setCapacity(
-                request.getCapacity()
-        );
-
-
-
-        event.setStartDate(
-                request.getStartDate()
-        );
-
-
-
-        event.setEndDate(
-                request.getEndDate()
-        );
-
-
-
-        event.setTags(
-                request.getTags()
-        );
-
-
-
-        event.setMetadata(
-                request.getMetadata()
-        );
-
-
-
-        Event updatedEvent =
-                eventRepository.save(event);
-
-
-
-        return new EventResponse(
-
-                updatedEvent.getId(),
-
-                updatedEvent.getTitle(),
-
-                updatedEvent.getStatus()
-        );
+        return new EventResponse(updated.getId(), updated.getTitle(), updated.getStatus());
     }
-
-
 
     /*
      * =========================================================
-     * PRIVATE MAPPER
+     * PRIVATE HELPERS
      * =========================================================
      */
 
-    private EventListResponse mapToListResponse(
-            Event event
-    ) {
+    private EventListResponse mapToListResponse(Event event) {
+
+        String venue = null;
+        String modality = null;
+        if (event.getLocation() != null) {
+            venue = event.getLocation().getVenue();
+            modality = event.getLocation().getModality();
+        }
+
+        LocalDateTime startDate = null;
+        if (event.getSchedule() != null) {
+            startDate = event.getSchedule().getStartDate();
+        }
+
+        Integer total = null;
+        Integer available = null;
+        if (event.getCapacity() != null) {
+            total = event.getCapacity().getTotal();
+            available = event.getCapacity().getAvailable();
+        }
 
         return new EventListResponse(
-
                 event.getId(),
-
+                event.getCode(),
                 event.getTitle(),
-
                 event.getType(),
-
-                event.getLocation(),
-
-                event.getCapacity(),
-
-                event.getStartDate(),
-
-                event.getStatus()
+                event.getStatus(),
+                startDate,
+                venue,
+                modality,
+                total,
+                available
         );
+    }
+
+    private boolean matchesText(String field, String query) {
+        return field != null && field.toLowerCase().contains(query);
     }
 }
