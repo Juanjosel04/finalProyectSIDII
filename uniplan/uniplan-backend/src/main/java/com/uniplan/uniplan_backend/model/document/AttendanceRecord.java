@@ -4,7 +4,6 @@ import com.uniplan.uniplan_backend.model.document.embedded.StudentSnapshot;
 import lombok.*;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -29,7 +28,6 @@ public class AttendanceRecord {
     /*
      * MongoDB _id of the event
      */
-    @Indexed
     private String eventId;
 
     private String eventCode;
@@ -37,7 +35,6 @@ public class AttendanceRecord {
     /*
      * MongoDB _id of the EventRegistrationDocument
      */
-    @Indexed
     private String registrationId;
 
     /*

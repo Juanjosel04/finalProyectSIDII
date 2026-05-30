@@ -3,7 +3,6 @@ package com.uniplan.uniplan_backend.model.document.embedded;
 import lombok.*;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -24,7 +23,6 @@ public class Event {
      * Human-readable unique code
      * Example: EVT-2025-001
      */
-    @Indexed(unique = true, sparse = true)
     private String code;
 
     /*

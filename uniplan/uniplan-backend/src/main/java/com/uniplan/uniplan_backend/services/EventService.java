@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final AuditService    auditService;
 
     /*
      * =========================================================
@@ -52,6 +54,12 @@ public class EventService {
                 .build();
 
         Event savedEvent = eventRepository.save(event);
+
+        auditService.log(
+                "EVENT", savedEvent.getId(), savedEvent.getCode(),
+                "CREATE", Map.of("role", "SYSTEM"), null,
+                Map.of("title", savedEvent.getTitle(), "status", "ACTIVE")
+        );
 
         return new EventResponse(
                 savedEvent.getId(),
@@ -146,6 +154,12 @@ public class EventService {
 
         Event updated = eventRepository.save(event);
 
+        auditService.log(
+                "EVENT", updated.getId(), updated.getCode(),
+                "CANCEL", Map.of("role", "SYSTEM"), null,
+                Map.of("status", Map.of("from", "ACTIVE", "to", "CANCELLED"))
+        );
+
         return new EventResponse(updated.getId(), updated.getTitle(), updated.getStatus());
     }
 
@@ -170,6 +184,12 @@ public class EventService {
         event.setUpdatedAt(LocalDateTime.now());
 
         Event updated = eventRepository.save(event);
+
+        auditService.log(
+                "EVENT", updated.getId(), updated.getCode(),
+                "UPDATE", Map.of("role", "SYSTEM"), null,
+                Map.of("title", updated.getTitle(), "updatedAt", updated.getUpdatedAt().toString())
+        );
 
         return new EventResponse(updated.getId(), updated.getTitle(), updated.getStatus());
     }

@@ -58,4 +58,22 @@ public class ViewController {
 
         return "create-event";
     }
+
+    @GetMapping("/admin/events")
+    public String adminEvents() {
+
+        return "admin-events";
+    }
+
+    @GetMapping("/admin/events/edit")
+    public String editEvent() {
+
+        return "edit-event";
+    }
+
+    @GetMapping("/events/detail")
+    public String eventDetail() {
+
+        return "event-detail";
+    }
 }

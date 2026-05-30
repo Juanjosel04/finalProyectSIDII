@@ -3,7 +3,7 @@ package com.uniplan.uniplan_backend.model.document;
 import lombok.*;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -30,7 +30,6 @@ public class AuditLog {
      * Type of entity affected
      * Example: EVENT | USER | REGISTRATION | ATTENDANCE | ORGANIZER
      */
-    @Indexed
     private String entity;
 
     /*
@@ -47,7 +46,6 @@ public class AuditLog {
      * Action performed
      * Example: CREATE | UPDATE | CANCEL | REGISTER | CHECK_IN | CHECK_OUT | DEACTIVATE
      */
-    @Indexed
     private String action;
 
     /*
@@ -78,6 +76,5 @@ public class AuditLog {
     /*
      * Audit — no updatedAt, logs are immutable
      */
-    @Indexed
     private LocalDateTime createdAt;
 }

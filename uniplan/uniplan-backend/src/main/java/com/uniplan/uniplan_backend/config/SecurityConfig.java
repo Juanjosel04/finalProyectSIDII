@@ -132,12 +132,12 @@ public class SecurityConfig {
                         .requestMatchers(
 
                                 "/admin/home",
-
+                                "/admin/events",
+                                "/admin/events/create",
+                                "/admin/events/edit",
                                 "/student/home",
-
                                 "/organizer/home",
-
-                                "/admin/events/create"
+                                "/events/detail"
 
                         ).permitAll()
 
@@ -164,12 +164,36 @@ public class SecurityConfig {
                          */
 
                         .requestMatchers(
-
-                                "/api/student/**",
-
-                                "/registrations/**"
-
+                                "/api/student/**"
                         ).hasRole("STUDENT")
+
+                        /*
+                         | POST /registrations  — inscribirse
+                         | DELETE /registrations/{id}  — cancelar
+                         | GET /registrations/my  — mis inscripciones
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/registrations"
+                        ).hasRole("STUDENT")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/registrations/**"
+                        ).hasRole("STUDENT")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/registrations/my"
+                        ).hasRole("STUDENT")
+
+                        /*
+                         | GET /registrations/event/{eventId}  — inscritos de un evento
+                         */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/registrations/event/**"
+                        ).hasAnyRole("ADMIN", "ORGANIZER")
 
 
 

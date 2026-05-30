@@ -4,9 +4,6 @@ import com.uniplan.uniplan_backend.model.document.embedded.StudentSnapshot;
 import lombok.*;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.CompoundIndexes;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -19,9 +16,6 @@ import java.util.Map;
  * so each document is self-contained.
  */
 @Document(collection = "event_registrations")
-@CompoundIndexes({
-    @CompoundIndex(name = "event_student_idx", def = "{'eventId': 1, 'student.userId': 1}", unique = true)
-})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -35,7 +29,6 @@ public class EventRegistrationDocument {
     /*
      * MongoDB _id of the event
      */
-    @Indexed
     private String eventId;
 
     /*

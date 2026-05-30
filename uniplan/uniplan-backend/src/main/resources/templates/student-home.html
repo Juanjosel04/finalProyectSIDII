@@ -324,147 +324,120 @@
 
 
 
-        <!-- Main Grid -->
-        <div class="content-grid">
+        <!-- EVENTOS DISPONIBLES -->
+        <div class="glass-card" style="margin-top:0;">
 
-
-
-            <!-- EVENTOS -->
-            <div class="glass-card schedule-card">
-
-                <div class="card-header">
-
-                    <h2>
-                        Eventos
-                    </h2>
-
-                    <div class="card-actions">
-
-                        <button
-                                class="add-btn"
-                                onclick="location.href='/student/events'"
-                        >
-                            Explorar
-                        </button>
-
-                    </div>
-
+            <div class="card-header">
+                <h2>Explorar eventos</h2>
+                <div class="card-actions">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Buscar..."
+                        oninput="filterEvents(this.value)"
+                        style="padding:0.45rem 0.9rem; border-radius:10px; border:1px solid rgba(255,255,255,0.15);
+                               background:rgba(255,255,255,0.06); color:#fff; font-size:0.85rem; width:180px;"
+                    >
                 </div>
-
-                <div class="schedule-content">
-
-                    <a
-                            href="/student/events"
-                            class="menu-link"
-                    >
-                        Explorar eventos
-                    </a>
-
-                    <a
-                            href="#"
-                            class="menu-link"
-                    >
-                        Mis inscripciones
-                    </a>
-
-                    <a
-                            href="#"
-                            class="menu-link"
-                    >
-                        Próximos eventos
-                    </a>
-
-                </div>
-
             </div>
 
-
-
-            <!-- PARTICIPACIÓN -->
-            <div class="glass-card announcements-card">
-
-                <div class="card-header">
-
-                    <h2>
-                        Participación
-                    </h2>
-
-                </div>
-
-                <div class="announcements-list">
-
-                    <a
-                            href="#"
-                            class="menu-link"
-                    >
-                        Registrar asistencia
-                    </a>
-
-                    <a
-                            href="#"
-                            class="menu-link"
-                    >
-                        Horas acumuladas
-                    </a>
-
-                    <a
-                            href="#"
-                            class="menu-link"
-                    >
-                        Eventos completados
-                    </a>
-
-                </div>
-
+            <!-- FILTROS POR TIPO -->
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; padding: 0 0 1rem; margin-top:-0.5rem;">
+                <button class="filter-chip active" onclick="setTypeFilter('', this)">Todos</button>
+                <button class="filter-chip" onclick="setTypeFilter('ACADEMIC', this)">Académico</button>
+                <button class="filter-chip" onclick="setTypeFilter('CULTURAL', this)">Cultural</button>
+                <button class="filter-chip" onclick="setTypeFilter('SPORT', this)">Deporte</button>
+                <button class="filter-chip" onclick="setTypeFilter('VOLUNTEER', this)">Voluntariado</button>
+                <button class="filter-chip" onclick="setTypeFilter('WORKSHOP', this)">Taller</button>
             </div>
 
-
-
-            <!-- ACTIVIDAD -->
-            <div class="glass-card courses-card">
-
-                <div class="card-header">
-
-                    <h2>
-                        Actividad
-                    </h2>
-
-                </div>
-
-                <div class="courses-list">
-
-                    <a
-                            href="#"
-                            class="menu-link"
-                    >
-                        Favoritos
-                    </a>
-
-                    <a
-                            href="#"
-                            class="menu-link"
-                    >
-                        Notificaciones
-                    </a>
-
-                    <a
-                            href="#"
-                            class="menu-link"
-                    >
-                        Última actividad
-                    </a>
-
-                </div>
-
+            <div id="eventsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
+                <p style="color:rgba(255,255,255,0.3); padding:1rem;">Cargando eventos...</p>
             </div>
 
         </div>
 
+        <!-- MIS INSCRIPCIONES -->
+        <div class="glass-card" style="margin-top:1.5rem;">
+            <div class="card-header">
+                <h2>Mis inscripciones</h2>
+            </div>
+            <div id="myRegsList">
+                <p style="color:rgba(255,255,255,0.3); padding:0.5rem 0; font-size:0.88rem;">Cargando...</p>
+            </div>
+        </div>
+
     </main>
 
-
+    <style>
+        .filter-chip {
+            padding: 0.3rem 0.85rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .filter-chip.active, .filter-chip:hover {
+            background: rgba(139,92,246,0.2);
+            border-color: rgba(139,92,246,0.4);
+            color: #c4b5fd;
+        }
+        .event-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 1.2rem;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, transform 0.15s;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+        .event-card:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(139,92,246,0.35);
+            transform: translateY(-2px);
+        }
+        .event-card-type {
+            font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+            text-transform: uppercase; color: #a78bfa; margin-bottom: 0.5rem;
+        }
+        .event-card-title {
+            font-size: 0.95rem; font-weight: 700;
+            color: rgba(255,255,255,0.92); margin-bottom: 0.4rem; line-height: 1.3;
+        }
+        .event-card-meta {
+            font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-bottom: 0.15rem;
+        }
+        .event-card-spots {
+            margin-top: 0.75rem; padding-top: 0.75rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .spots-text { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+        .spots-num  { font-size: 0.95rem; font-weight: 700; color: #a78bfa; }
+        .my-reg-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.88rem;
+        }
+        .my-reg-item:last-child { border-bottom: none; }
+        .reg-status-chip {
+            padding: 0.2rem 0.6rem; border-radius: 12px;
+            font-size: 0.7rem; font-weight: 700;
+        }
+        .chip-registered{ background:rgba(34,197,94,0.15);  color:#86efac; }
+        .chip-waitlist  { background:rgba(251,191,36,0.15); color:#fde68a; }
+        .chip-cancelled { background:rgba(239,68,68,0.15);  color:#fca5a5; }
+        .chip-attended  { background:rgba(139,92,246,0.15); color:#c4b5fd; }
+    </style>
 
     <script src="/js/auth.js"></script>
+    <script src="/js/student-home.js"></script>
 
 </body>
 </html>

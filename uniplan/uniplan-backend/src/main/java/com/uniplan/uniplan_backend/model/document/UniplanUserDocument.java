@@ -4,7 +4,7 @@ import com.uniplan.uniplan_backend.model.document.embedded.InstitutionalRef;
 import lombok.*;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -31,12 +31,10 @@ public class UniplanUserDocument {
     /*
      * UUID from PostgreSQL uniplan.users (foreign key bridge)
      */
-    @Indexed(unique = true)
     private String postgresUserId;
 
     private String username;
 
-    @Indexed(unique = true)
     private String email;
 
     /*
