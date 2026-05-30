@@ -1,41 +1,35 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>UniPlan — Editar Evento</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/create-event-style.css">
-
+    <link rel="stylesheet" href="/css/home-style.css">
+    <link rel="stylesheet" href="/css/events-style.css">
 </head>
+<body style="display:none;">
 
-<body style="display: none;">
-
-<!-- AUTH GUARD -->
 <script>
-    const token = sessionStorage.getItem("token");
-    const role  = sessionStorage.getItem("role");
-    if (!token || (role !== "ADMIN" && role !== "ORGANIZER")) {
-        window.location.href = "/login";
-    } else {
-        document.body.style.display = "block";
-    }
+    (function () {
+        const token = sessionStorage.getItem("token");
+        const role  = sessionStorage.getItem("role");
+        if (!token || (role !== "ADMIN" && role !== "ORGANIZER")) {
+            window.location.href = "/login";
+        } else {
+            document.body.style.display = "block";
+        }
+    })();
 </script>
 
-<!-- BACKGROUND -->
 <div class="bg-image-layer"></div>
 <div class="bg-overlay-dark"></div>
-
-<!-- LIGHTS -->
 <div class="ambient-light light-1"></div>
 <div class="ambient-light light-2"></div>
 
-<!-- NAVBAR -->
 <nav class="navbar">
     <div class="nav-container">
-        <a href="/admin/events" class="nav-brand">
+        <a href="/admin/events" class="nav-brand" style="text-decoration:none;">
             <h2 class="brand-title">UniPlan</h2>
             <img src="/images/logoIcesi.png" alt="Logo Icesi" class="nav-logo">
         </a>
@@ -46,30 +40,27 @@
     </div>
 </nav>
 
-<!-- MAIN -->
-<main class="create-event-container">
-    <div class="event-form-card">
+<main class="dashboard-container">
 
-        <!-- HEADER -->
-        <div class="form-header">
-            <h1>Editar Evento</h1>
-            <p>Modifica los datos del evento y guarda los cambios.</p>
-        </div>
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Editar Evento</h1>
+        <p class="dashboard-subtitle">Modifica los datos del evento y guarda los cambios.</p>
+    </div>
 
-        <!-- FORM -->
-        <form id="editEventForm">
+    <div class="glass-card" style="max-width:860px; padding:2rem;">
 
-            <!-- ── INFORMACIÓN BÁSICA ── -->
-            <div class="form-section-title">Información básica</div>
+        <form id="editEventForm" class="ev-form">
 
-            <div class="form-row">
-                <div class="input-group">
-                    <label for="title">Título del evento *</label>
-                    <input type="text" id="title" placeholder="Ej: Hackathon UniPlan 2026" required>
+            <p class="ev-section-label">Información básica</p>
+
+            <div class="ev-row">
+                <div class="ev-field">
+                    <label class="ev-label" for="title">Título del evento *</label>
+                    <input class="ev-input" type="text" id="title" placeholder="Ej: Hackathon UniPlan 2026" required>
                 </div>
-                <div class="input-group">
-                    <label for="type">Tipo de evento *</label>
-                    <select id="type" required>
+                <div class="ev-field">
+                    <label class="ev-label" for="type">Tipo de evento *</label>
+                    <select class="ev-input" id="type" required>
                         <option value="">Selecciona un tipo</option>
                         <option value="ACADEMIC">Académico</option>
                         <option value="CULTURAL">Cultural</option>
@@ -81,106 +72,102 @@
                 </div>
             </div>
 
-            <div class="input-group">
-                <label for="description">Descripción *</label>
-                <textarea id="description" rows="4" placeholder="Describe el evento..." required></textarea>
+            <div class="ev-field">
+                <label class="ev-label" for="description">Descripción *</label>
+                <textarea class="ev-input" id="description" rows="4" placeholder="Describe el evento..." required></textarea>
             </div>
 
-            <!-- ── FECHAS ── -->
-            <div class="form-section-title">Fechas</div>
+            <p class="ev-section-label">Fechas</p>
 
-            <div class="form-row">
-                <div class="input-group">
-                    <label for="startDate">Fecha de inicio *</label>
-                    <input type="datetime-local" id="startDate" required>
+            <div class="ev-row">
+                <div class="ev-field">
+                    <label class="ev-label" for="startDate">Fecha de inicio *</label>
+                    <input class="ev-input" type="datetime-local" id="startDate" required>
                 </div>
-                <div class="input-group">
-                    <label for="endDate">Fecha de finalización *</label>
-                    <input type="datetime-local" id="endDate" required>
+                <div class="ev-field">
+                    <label class="ev-label" for="endDate">Fecha de finalización *</label>
+                    <input class="ev-input" type="datetime-local" id="endDate" required>
                 </div>
             </div>
 
-            <!-- ── UBICACIÓN ── -->
-            <div class="form-section-title">Ubicación</div>
+            <p class="ev-section-label">Ubicación</p>
 
-            <div class="form-row">
-                <div class="input-group">
-                    <label for="modality">Modalidad *</label>
-                    <select id="modality" required>
+            <div class="ev-row">
+                <div class="ev-field">
+                    <label class="ev-label" for="modality">Modalidad *</label>
+                    <select class="ev-input" id="modality" required>
                         <option value="">Selecciona modalidad</option>
                         <option value="IN_PERSON">Presencial</option>
                         <option value="VIRTUAL">Virtual</option>
                         <option value="HYBRID">Híbrido</option>
                     </select>
                 </div>
-                <div class="input-group">
-                    <label for="venue">Lugar / Salón *</label>
-                    <input type="text" id="venue" placeholder="Ej: Auditorio Principal" required>
+                <div class="ev-field">
+                    <label class="ev-label" for="venue">Lugar / Salón *</label>
+                    <input class="ev-input" type="text" id="venue" placeholder="Ej: Auditorio Principal" required>
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="input-group">
-                    <label for="campus">Campus / Edificio</label>
-                    <input type="text" id="campus" placeholder="Ej: Campus Norte, Bloque A">
+            <div class="ev-row">
+                <div class="ev-field">
+                    <label class="ev-label" for="campus">Campus / Edificio</label>
+                    <input class="ev-input" type="text" id="campus" placeholder="Ej: Campus Norte, Bloque A">
                 </div>
-                <div class="input-group">
-                    <label for="room">Sala / Aula</label>
-                    <input type="text" id="room" placeholder="Ej: Sala 302">
+                <div class="ev-field">
+                    <label class="ev-label" for="room">Sala / Aula</label>
+                    <input class="ev-input" type="text" id="room" placeholder="Ej: Sala 302">
                 </div>
             </div>
 
-            <div class="input-group" id="meetingUrlGroup" style="display:none;">
-                <label for="meetingUrl">Enlace de reunión</label>
-                <input type="url" id="meetingUrl" placeholder="https://meet.google.com/...">
+            <div class="ev-field" id="meetingUrlGroup" style="display:none;">
+                <label class="ev-label" for="meetingUrl">Enlace de reunión</label>
+                <input class="ev-input" type="url" id="meetingUrl" placeholder="https://meet.google.com/...">
             </div>
 
-            <!-- ── CAPACIDAD ── -->
-            <div class="form-section-title">Capacidad</div>
+            <div class="ev-field">
+                <label class="ev-label" for="address">Dirección <span class="ev-hint">(eventos fuera del campus)</span></label>
+                <input class="ev-input" type="text" id="address" placeholder="Ej: Calle 18 # 122-135, Cali">
+            </div>
 
-            <div class="form-row">
-                <div class="input-group">
-                    <label for="capacity">Cupos totales *</label>
-                    <input type="number" id="capacity" min="1" placeholder="Ej: 120" required>
+            <p class="ev-section-label">Capacidad</p>
+
+            <div class="ev-row">
+                <div class="ev-field">
+                    <label class="ev-label" for="capacity">Cupos totales *</label>
+                    <input class="ev-input" type="number" id="capacity" min="1" placeholder="Ej: 120" required>
                 </div>
-                <div class="input-group" style="justify-content: flex-end; padding-top: 28px;">
-                    <label class="checkbox-label">
+                <div class="ev-field ev-field-center">
+                    <label class="ev-checkbox">
                         <input type="checkbox" id="waitlistEnabled">
                         Habilitar lista de espera
                     </label>
                 </div>
             </div>
 
-            <!-- ── DETALLES ── -->
-            <div class="form-section-title">Detalles adicionales</div>
+            <p class="ev-section-label">Detalles adicionales</p>
 
-            <div class="input-group">
-                <label for="details">
+            <div class="ev-field">
+                <label class="ev-label" for="details">
                     Detalles en JSON
-                    <span class="label-hint">speaker, tags, requirements, volunteerHours, etc.</span>
+                    <span class="ev-hint">speaker, tags, requirements, volunteerHours…</span>
                 </label>
-                <textarea id="details" rows="4" placeholder='Ej: {"speaker":"Carlos López","tags":["IA","tecnología"]}'></textarea>
+                <textarea class="ev-input" id="details" rows="3"
+                    placeholder='{"speaker":"Carlos López","tags":["IA","tecnología"]}'></textarea>
             </div>
 
-            <!-- BUTTONS -->
-            <div class="form-row" style="gap: 1rem; margin-top: 0.5rem;">
-                <a href="/admin/events" class="create-event-btn" style="text-decoration:none; background: rgba(255,255,255,0.08); text-align:center; flex:1;">
-                    <span>← Volver</span>
-                </a>
-                <button type="submit" class="create-event-btn" style="flex:2;">
-                    <span>Guardar cambios</span>
-                    <span>→</span>
-                </button>
-            </div>
+            <div id="message" class="ev-msg" style="display:none;"></div>
 
-            <div id="message" style="display:none; margin-top:1rem;"></div>
+            <div class="ev-actions">
+                <a href="/admin/events" class="ev-btn-secondary">← Volver</a>
+                <button type="submit" class="ev-btn-primary">Guardar cambios →</button>
+            </div>
 
         </form>
     </div>
+
 </main>
 
 <script src="/js/auth.js"></script>
 <script src="/js/edit-event.js"></script>
-
 </body>
 </html>

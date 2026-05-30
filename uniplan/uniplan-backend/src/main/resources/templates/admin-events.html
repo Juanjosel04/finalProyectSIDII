@@ -3,109 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>UniPlan — Eventos</title>
+    <title>UniPlan — Gestión de Eventos</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/home-style.css">
-    <style>
-        .events-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 0.6rem 1rem;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.15);
-            background: rgba(255,255,255,0.06);
-            color: #fff;
-            font-size: 0.9rem;
-        }
-        .search-input::placeholder { color: rgba(255,255,255,0.35); }
-        .filter-select {
-            padding: 0.6rem 1rem;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.15);
-            background: rgba(255,255,255,0.06);
-            color: #fff;
-            font-size: 0.9rem;
-        }
-        .filter-select option { background: #1a1a2e; }
-        .events-table-wrap {
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.88rem;
-        }
-        thead th {
-            text-align: left;
-            padding: 0.75rem 1rem;
-            color: rgba(255,255,255,0.45);
-            font-weight: 600;
-            font-size: 0.75rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        tbody tr {
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: background 0.15s;
-        }
-        tbody tr:hover { background: rgba(255,255,255,0.03); }
-        tbody td {
-            padding: 0.85rem 1rem;
-            color: rgba(255,255,255,0.82);
-            vertical-align: middle;
-        }
-        .badge {
-            display: inline-block;
-            padding: 0.2rem 0.65rem;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-        }
-        .badge-active   { background: rgba(34,197,94,0.15);  color: #86efac; }
-        .badge-cancelled{ background: rgba(239,68,68,0.15);  color: #fca5a5; }
-        .badge-finished { background: rgba(148,163,184,0.15);color: #cbd5e1; }
-        .badge-draft    { background: rgba(251,191,36,0.15); color: #fde68a; }
-        .action-btn {
-            padding: 0.35rem 0.8rem;
-            border-radius: 8px;
-            border: none;
-            font-size: 0.78rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.15s;
-        }
-        .action-btn:hover { opacity: 0.8; }
-        .btn-view   { background: rgba(59,130,246,0.2);  color: #93c5fd; }
-        .btn-edit   { background: rgba(139,92,246,0.2); color: #c4b5fd; }
-        .btn-cancel { background: rgba(239,68,68,0.2);  color: #fca5a5; }
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: rgba(255,255,255,0.3);
-        }
-    </style>
+    <link rel="stylesheet" href="/css/events-style.css">
 </head>
-
 <body style="display:none;">
 
-<!-- AUTH GUARD — ADMIN o ORGANIZER -->
 <script>
-    const token = sessionStorage.getItem("token");
-    const role  = sessionStorage.getItem("role");
-    if (!token || (role !== "ADMIN" && role !== "ORGANIZER")) {
-        window.location.href = "/login";
-    } else {
-        document.body.style.display = "block";
-    }
+    (function () {
+        const token = sessionStorage.getItem("token");
+        const role  = sessionStorage.getItem("role");
+        if (!token || (role !== "ADMIN" && role !== "ORGANIZER")) {
+            window.location.href = "/login";
+        } else {
+            document.body.style.display = "block";
+        }
+    })();
 </script>
 
 <div class="bg-image-layer"></div>
@@ -113,23 +27,19 @@
 <div class="ambient-light light-1"></div>
 <div class="ambient-light light-2"></div>
 
-<!-- NAVBAR -->
 <nav class="navbar">
     <div class="nav-container">
-        <a href="/admin/home" class="nav-brand">
+        <a href="/admin/home" class="nav-brand" style="text-decoration:none;">
             <h2 class="brand-title">UniPlan</h2>
             <img src="/images/logoIcesi.png" alt="Logo Icesi" class="nav-logo">
         </a>
         <div class="nav-user">
-            <a href="/admin/events/create" class="add-btn" style="text-decoration:none; padding: 0.5rem 1.2rem;">
-                + Crear evento
-            </a>
+            <a href="/admin/events/create" class="add-btn" style="text-decoration:none;">+ Crear evento</a>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </div>
 </nav>
 
-<!-- MAIN -->
 <main class="dashboard-container">
 
     <div class="dashboard-header">
@@ -137,25 +47,20 @@
         <p class="dashboard-subtitle">Visualiza, filtra y administra todos los eventos de la plataforma</p>
     </div>
 
-    <div class="glass-card" style="padding: 1.5rem;">
+    <div class="glass-card" style="padding:1.5rem;">
 
-        <!-- TOOLBAR -->
-        <div class="events-toolbar">
-            <input
-                type="text"
-                id="searchInput"
-                class="search-input"
-                placeholder="Buscar por título, lugar o tipo..."
-                oninput="applyFilters()"
-            >
-            <select id="statusFilter" class="filter-select" onchange="applyFilters()">
+        <div class="ev-toolbar">
+            <input type="text" id="searchInput" class="ev-search"
+                   placeholder="Buscar por título, lugar o tipo..."
+                   oninput="applyFilters()">
+            <select id="statusFilter" class="ev-filter" onchange="applyFilters()">
                 <option value="">Todos los estados</option>
                 <option value="ACTIVE">Activos</option>
                 <option value="FINISHED">Finalizados</option>
                 <option value="CANCELLED">Cancelados</option>
                 <option value="DRAFT">Borrador</option>
             </select>
-            <select id="typeFilter" class="filter-select" onchange="applyFilters()">
+            <select id="typeFilter" class="ev-filter" onchange="applyFilters()">
                 <option value="">Todos los tipos</option>
                 <option value="ACADEMIC">Académico</option>
                 <option value="CULTURAL">Cultural</option>
@@ -166,9 +71,8 @@
             </select>
         </div>
 
-        <!-- TABLE -->
-        <div class="events-table-wrap">
-            <table id="eventsTable">
+        <div class="ev-table-wrap">
+            <table class="ev-table">
                 <thead>
                     <tr>
                         <th>Título</th>
@@ -182,7 +86,7 @@
                     </tr>
                 </thead>
                 <tbody id="eventsBody">
-                    <tr><td colspan="8" class="empty-state">Cargando eventos...</td></tr>
+                    <tr><td colspan="8" class="ev-empty">Cargando eventos...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -192,105 +96,6 @@
 </main>
 
 <script src="/js/auth.js"></script>
-<script>
-    let allEvents = [];
-
-    /* ── LOAD EVENTS ── */
-    async function loadEvents() {
-        const token = sessionStorage.getItem("token");
-        try {
-            const res = await fetch("/events", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (!res.ok) {
-                const errBody = await res.text();
-                console.error("Backend error:", errBody);
-                throw new Error(errBody);
-            }
-            allEvents = await res.json();
-            renderTable(allEvents);
-        } catch (err) {
-            console.error("loadEvents error:", err);
-            document.getElementById("eventsBody").innerHTML =
-                `<tr><td colspan="8" class="empty-state" style="color:#fca5a5; font-size:0.8rem;">${err.message}</td></tr>`;
-        }
-    }
-
-    /* ── RENDER ── */
-    function renderTable(events) {
-        const tbody = document.getElementById("eventsBody");
-        if (!events.length) {
-            tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No hay eventos que coincidan.</td></tr>`;
-            return;
-        }
-        tbody.innerHTML = events.map(e => `
-            <tr>
-                <td><strong>${e.title || "—"}</strong></td>
-                <td>${e.type || "—"}</td>
-                <td>${e.modality || "—"}</td>
-                <td>${e.venue || "—"}</td>
-                <td>${e.startDate ? formatDate(e.startDate) : "—"}</td>
-                <td>${e.availableSpots ?? "—"} / ${e.totalCapacity ?? "—"}</td>
-                <td><span class="badge badge-${(e.status||"").toLowerCase()}">${e.status || "—"}</span></td>
-                <td style="display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap;">
-                    <button class="action-btn btn-view"   onclick="location.href='/events/detail?id=${e.id}'">Ver</button>
-                    <button class="action-btn btn-edit"   onclick="location.href='/admin/events/edit?id=${e.id}'">Editar</button>
-                    ${e.status === "ACTIVE"
-                        ? `<button class="action-btn btn-cancel" onclick="cancelEvent('${e.id}', this)">Cancelar</button>`
-                        : ""
-                    }
-                </td>
-            </tr>
-        `).join("");
-    }
-
-    /* ── FILTER ── */
-    function applyFilters() {
-        const q      = document.getElementById("searchInput").value.toLowerCase();
-        const status = document.getElementById("statusFilter").value;
-        const type   = document.getElementById("typeFilter").value;
-
-        const filtered = allEvents.filter(e => {
-            const matchQ = !q ||
-                (e.title  && e.title.toLowerCase().includes(q)) ||
-                (e.venue  && e.venue.toLowerCase().includes(q)) ||
-                (e.type   && e.type.toLowerCase().includes(q));
-            const matchStatus = !status || e.status === status;
-            const matchType   = !type   || e.type   === type;
-            return matchQ && matchStatus && matchType;
-        });
-        renderTable(filtered);
-    }
-
-    /* ── CANCEL EVENT ── */
-    async function cancelEvent(id, btn) {
-        if (!confirm("¿Cancelar este evento?")) return;
-        const token = sessionStorage.getItem("token");
-        btn.disabled = true;
-        btn.textContent = "...";
-        try {
-            const res = await fetch(`/events/${id}`, {
-                method: "DELETE",
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (!res.ok) throw new Error();
-            await loadEvents();
-        } catch {
-            btn.disabled = false;
-            btn.textContent = "Cancelar";
-            alert("No se pudo cancelar el evento.");
-        }
-    }
-
-    /* ── FORMAT DATE ── */
-    function formatDate(dt) {
-        return new Date(dt).toLocaleString("es-CO", {
-            day: "2-digit", month: "short", year: "numeric",
-            hour: "2-digit", minute: "2-digit"
-        });
-    }
-
-    loadEvents();
-</script>
+<script src="/js/admin-events.js"></script>
 </body>
 </html>

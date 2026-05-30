@@ -5,7 +5,10 @@ import com.uniplan.uniplan_backend.dto.EventListResponse;
 import com.uniplan.uniplan_backend.dto.EventResponse;
 import com.uniplan.uniplan_backend.model.document.embedded.Event;
 import com.uniplan.uniplan_backend.model.document.embedded.EventCapacity;
+import com.uniplan.uniplan_backend.model.document.embedded.EventOrganizer;
+import com.uniplan.uniplan_backend.model.relational.uniplan.User;
 import com.uniplan.uniplan_backend.repositories.EventRepository;
+import com.uniplan.uniplan_backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final UserRepository  userRepository;
     private final AuditService    auditService;
 
     /*
@@ -27,15 +31,18 @@ public class EventService {
      * =========================================================
      */
 
-    public EventResponse createEvent(CreateEventRequest request) {
+    public EventResponse createEvent(CreateEventRequest request, String organizerEmail) {
 
-        // Initialize available = total when creating
+        // Inicializar cupos
         EventCapacity capacity = request.getCapacity();
         if (capacity != null && capacity.getAvailable() == null) {
             capacity.setAvailable(capacity.getTotal());
             capacity.setRegistered(0);
             capacity.setWaitlist(0);
         }
+
+        // Construir organizer desde el usuario autenticado (JWT)
+        EventOrganizer organizer = buildOrganizer(request, organizerEmail);
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -46,7 +53,7 @@ public class EventService {
                 .schedule(request.getSchedule())
                 .location(request.getLocation())
                 .capacity(capacity)
-                .organizer(request.getOrganizer())
+                .organizer(organizer)
                 .details(request.getDetails())
                 .status("ACTIVE")
                 .createdAt(now)
@@ -237,5 +244,29 @@ public class EventService {
 
     private boolean matchesText(String field, String query) {
         return field != null && field.toLowerCase().contains(query);
+    }
+
+    /*
+     * Construye el snapshot del organizador desde el usuario autenticado.
+     * Si el request ya trae organizer (edición), lo usa. Si no, lo infiere del JWT.
+     */
+    private EventOrganizer buildOrganizer(CreateEventRequest request, String email) {
+
+        // Si el request ya trae organizer válido, usarlo
+        if (request.getOrganizer() != null && request.getOrganizer().getUserId() != null) {
+            return request.getOrganizer();
+        }
+
+        // Inferir desde el usuario autenticado
+        if (email == null) return null;
+
+        return userRepository.findByEmail(email)
+                .map(user -> EventOrganizer.builder()
+                        .userId(user.getId().toString())
+                        .email(user.getEmail())
+                        .organizerType(user.getRole())
+                        .build()
+                )
+                .orElse(null);
     }
 }

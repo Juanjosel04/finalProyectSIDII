@@ -1,21 +1,15 @@
 package com.uniplan.uniplan_backend.controllers;
 
 import com.uniplan.uniplan_backend.dto.CreateEventRequest;
-
 import com.uniplan.uniplan_backend.dto.EventListResponse;
-
 import com.uniplan.uniplan_backend.dto.EventResponse;
-
 import com.uniplan.uniplan_backend.model.document.embedded.Event;
-
 import com.uniplan.uniplan_backend.services.EventService;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 
@@ -38,15 +32,11 @@ public class EventController {
 
     @PostMapping
     public ResponseEntity<EventResponse> createEvent(
-
-            @RequestBody
-            CreateEventRequest request
+            @RequestBody CreateEventRequest request,
+            Principal principal
     ) {
-
-        return ResponseEntity.ok(
-
-                eventService.createEvent(request)
-        );
+        String email = principal != null ? principal.getName() : null;
+        return ResponseEntity.ok(eventService.createEvent(request, email));
     }
 
 

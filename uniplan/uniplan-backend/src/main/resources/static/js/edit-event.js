@@ -1,18 +1,18 @@
 /* =========================================================
-   EDIT EVENT — carga el evento por ID y hace PUT /events/{id}
+   EDIT EVENT — carga evento y hace PUT /events/{id}
+   IDs: title, type, description, startDate, endDate,
+        modality, venue, campus, room, address, meetingUrlGroup, meetingUrl,
+        capacity, waitlistEnabled, details, message, editEventForm
 ========================================================= */
 
 const token   = sessionStorage.getItem("token");
-const msgDiv  = document.getElementById("message");
-
-// Obtener el ID del evento desde la URL: /admin/events/edit?id=xxx
 const eventId = new URLSearchParams(window.location.search).get("id");
+const msgDiv  = document.getElementById("message");
+let currentCapacity = { registered: 0, waitlist: 0 };
 
-if (!eventId) {
-    window.location.href = "/admin/events";
-}
+if (!eventId) window.location.href = "/admin/events";
 
-/* ── SHOW / HIDE MEETING URL ── */
+/* ── Mostrar/ocultar link de reunión ── */
 document.getElementById("modality").addEventListener("change", toggleMeetingUrl);
 
 function toggleMeetingUrl() {
@@ -21,72 +21,61 @@ function toggleMeetingUrl() {
         (v === "VIRTUAL" || v === "HYBRID") ? "block" : "none";
 }
 
-/* ── HELPERS ── */
-function showMessage(text, type = "success") {
-    msgDiv.style.display = "block";
+/* ── Helpers ── */
+function showMsg(text, type) {
+    msgDiv.className     = `ev-msg ev-msg-${type}`;
     msgDiv.textContent   = text;
-    msgDiv.style.background = type === "success"
-        ? "rgba(34,197,94,0.12)"  : "rgba(239,68,68,0.12)";
-    msgDiv.style.border = type === "success"
-        ? "1px solid rgba(34,197,94,0.28)" : "1px solid rgba(239,68,68,0.28)";
-    msgDiv.style.color  = type === "success" ? "#86efac" : "#fca5a5";
-    msgDiv.style.padding = "0.75rem 1rem";
-    msgDiv.style.borderRadius = "10px";
+    msgDiv.style.display = "block";
 }
 
-function toDatetimeLocal(isoString) {
-    if (!isoString) return "";
-    // "2025-05-30T10:00:00" → "2025-05-30T10:00"
-    return isoString.substring(0, 16);
+function toLocal(iso) {
+    if (!iso) return "";
+    return iso.substring(0, 16);
 }
 
-/* ── LOAD EVENT ── */
+/* ── Cargar evento ── */
 async function loadEvent() {
     try {
         const res = await fetch(`/events/${eventId}`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
-        if (!res.ok) throw new Error("No se encontró el evento");
+        if (!res.ok) throw new Error("Evento no encontrado");
         const e = await res.json();
 
-        // Básicos
         document.getElementById("title").value       = e.title       || "";
         document.getElementById("type").value        = e.type        || "";
         document.getElementById("description").value = e.description || "";
 
-        // Schedule
         if (e.schedule) {
-            document.getElementById("startDate").value = toDatetimeLocal(e.schedule.startDate);
-            document.getElementById("endDate").value   = toDatetimeLocal(e.schedule.endDate);
+            document.getElementById("startDate").value = toLocal(e.schedule.startDate);
+            document.getElementById("endDate").value   = toLocal(e.schedule.endDate);
         }
-
-        // Location
         if (e.location) {
-            document.getElementById("modality").value   = e.location.modality  || "";
-            document.getElementById("venue").value      = e.location.venue     || "";
-            document.getElementById("campus").value     = e.location.campus    || "";
-            document.getElementById("room").value       = e.location.room      || "";
+            document.getElementById("modality").value   = e.location.modality   || "";
+            document.getElementById("venue").value      = e.location.venue      || "";
+            document.getElementById("campus").value     = e.location.campus     || "";
+            document.getElementById("room").value       = e.location.room       || "";
+            document.getElementById("address").value   = e.location.address    || "";
             document.getElementById("meetingUrl").value = e.location.meetingUrl || "";
             toggleMeetingUrl();
         }
-
-        // Capacity
         if (e.capacity) {
-            document.getElementById("capacity").value         = e.capacity.total || "";
-            document.getElementById("waitlistEnabled").checked = e.capacity.waitlistEnabled || false;
+            document.getElementById("capacity").value          = e.capacity.total || "";
+            document.getElementById("waitlistEnabled").checked = !!e.capacity.waitlistEnabled;
+            currentCapacity = {
+                registered: e.capacity.registered ?? 0,
+                waitlist:   e.capacity.waitlist   ?? 0
+            };
         }
-
-        // Details
         if (e.details && Object.keys(e.details).length > 0) {
             document.getElementById("details").value = JSON.stringify(e.details, null, 2);
         }
-
     } catch (err) {
-        showMessage(err.message, "error");
+        showMsg(err.message, "error");
     }
 }
 
-/* ── SUBMIT ── */
+/* ── Submit ── */
 document.getElementById("editEventForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     msgDiv.style.display = "none";
@@ -100,69 +89,72 @@ document.getElementById("editEventForm").addEventListener("submit", async (e) =>
     const venue       = document.getElementById("venue").value.trim();
     const campus      = document.getElementById("campus").value.trim();
     const room        = document.getElementById("room").value.trim();
+    const address     = document.getElementById("address").value.trim();
     const meetingUrl  = document.getElementById("meetingUrl").value.trim();
     const capacity    = parseInt(document.getElementById("capacity").value);
     const waitlist    = document.getElementById("waitlistEnabled").checked;
     const detailsRaw  = document.getElementById("details").value.trim();
+    const timezone    = Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Bogota";
 
     if (!title || !type || !description || !startDate || !endDate || !modality || !venue || !capacity) {
-        showMessage("Completa todos los campos requeridos (*)", "error");
-        return;
+        showMsg("Completa todos los campos requeridos (*)", "error"); return;
     }
     if (new Date(endDate) <= new Date(startDate)) {
-        showMessage("La fecha de finalización debe ser posterior a la de inicio.", "error");
-        return;
+        showMsg("La fecha de finalización debe ser posterior a la de inicio.", "error"); return;
     }
     if ((modality === "VIRTUAL" || modality === "HYBRID") && !meetingUrl) {
-        showMessage("Ingresa el enlace de reunión.", "error");
-        return;
+        showMsg("Ingresa el enlace de reunión.", "error"); return;
     }
 
     let details = {};
     if (detailsRaw) {
         try { details = JSON.parse(detailsRaw); }
-        catch { showMessage("El JSON de detalles no es válido.", "error"); return; }
+        catch { showMsg("El JSON de detalles no es válido.", "error"); return; }
     }
+
+    const durationMinutes = Math.round((new Date(endDate) - new Date(startDate)) / 60000);
+    const newAvailable    = Math.max(0, capacity - currentCapacity.registered);
 
     const body = {
         title, description, type,
-        schedule: { startDate, endDate },
-        location: { venue, campus: campus || null, room: room || null, modality, meetingUrl: meetingUrl || null },
-        capacity: { total: capacity, waitlistEnabled: waitlist },
+        schedule: { startDate, endDate, durationMinutes, timezone },
+        location: {
+            venue,
+            campus:     campus     || null,
+            room:       room       || null,
+            address:    address    || null,
+            modality,
+            meetingUrl: meetingUrl || null
+        },
+        capacity: {
+            total:           capacity,
+            registered:      currentCapacity.registered,
+            available:       newAvailable,
+            waitlist:        currentCapacity.waitlist,
+            waitlistEnabled: waitlist
+        },
         details
     };
 
-    const btn = document.querySelector(".create-event-btn[type=submit]");
-    const orig = btn.innerHTML;
-    btn.disabled  = true;
-    btn.innerHTML = "<span>Guardando...</span>";
+    const btn = document.querySelector(".ev-btn-primary");
+    const orig = btn.textContent;
+    btn.disabled = true; btn.textContent = "Guardando...";
 
     try {
         const res = await fetch(`/events/${eventId}`, {
-            method:  "PUT",
-            headers: {
-                "Content-Type":  "application/json",
-                "Authorization": `Bearer ${token}`
-            },
+            method: "PUT",
+            headers: { "Content-Type":"application/json", "Authorization":`Bearer ${token}` },
             body: JSON.stringify(body)
         });
+        if (!res.ok) { const d = await res.text(); throw new Error(d); }
 
-        if (!res.ok) {
-            const err = await res.text();
-            throw new Error(err);
-        }
-
-        showMessage("Evento actualizado correctamente.", "success");
+        showMsg("Evento actualizado correctamente.", "success");
         setTimeout(() => { window.location.href = "/admin/events"; }, 1500);
-
     } catch (err) {
-        const msg = err.message?.length < 200 ? err.message : "No se pudo actualizar el evento.";
-        showMessage(msg, "error");
+        showMsg(err.message?.length < 200 ? err.message : "No se pudo actualizar el evento.", "error");
     } finally {
-        btn.disabled  = false;
-        btn.innerHTML = orig;
+        btn.disabled = false; btn.textContent = orig;
     }
 });
 
-// Cargar datos al iniciar
 loadEvent();

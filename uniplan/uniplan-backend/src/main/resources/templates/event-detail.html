@@ -6,217 +6,12 @@
     <title>UniPlan — Detalle de Evento</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/home-style.css">
-    <style>
-        .detail-grid {
-            display: grid;
-            grid-template-columns: 1fr 340px;
-            gap: 1.5rem;
-            align-items: start;
-        }
-        @media (max-width: 900px) {
-            .detail-grid { grid-template-columns: 1fr; }
-        }
-
-        /* HERO */
-        .event-hero {
-            padding: 2rem 2rem 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-            margin-bottom: 1.5rem;
-        }
-        .event-type-badge {
-            display: inline-block;
-            padding: 0.25rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            background: rgba(139,92,246,0.18);
-            color: #c4b5fd;
-            margin-bottom: 1rem;
-        }
-        .event-title {
-            font-size: 2rem;
-            font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: 0.75rem;
-        }
-        .event-description {
-            color: rgba(255,255,255,0.6);
-            font-size: 0.95rem;
-            line-height: 1.7;
-        }
-
-        /* INFO BLOCKS */
-        .info-section { padding: 0 2rem 1.5rem; }
-        .info-section-title {
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.35);
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-        }
-        .info-row {
-            display: flex;
-            gap: 2rem;
-            flex-wrap: wrap;
-            margin-bottom: 0.75rem;
-        }
-        .info-item { flex: 1; min-width: 140px; }
-        .info-label {
-            font-size: 0.72rem;
-            color: rgba(255,255,255,0.35);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 0.25rem;
-        }
-        .info-value {
-            font-size: 0.93rem;
-            color: rgba(255,255,255,0.88);
-            font-weight: 500;
-        }
-
-        /* CAPACITY BAR */
-        .capacity-bar-wrap { margin-top: 0.5rem; }
-        .capacity-bar {
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 0.4rem;
-        }
-        .capacity-fill {
-            height: 100%;
-            border-radius: 10px;
-            background: linear-gradient(90deg, #8b5cf6, #6366f1);
-            transition: width 0.6s ease;
-        }
-        .capacity-fill.full { background: linear-gradient(90deg, #ef4444, #dc2626); }
-
-        /* STATUS BADGE */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.3rem 0.9rem;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-        .status-active   { background: rgba(34,197,94,0.15);  color: #86efac; }
-        .status-cancelled{ background: rgba(239,68,68,0.15);  color: #fca5a5; }
-        .status-finished { background: rgba(148,163,184,0.15);color: #cbd5e1; }
-
-        /* SIDEBAR — INSCRIPCION */
-        .register-card {
-            position: sticky;
-            top: 100px;
-        }
-        .register-card .glass-card { padding: 1.5rem; }
-        .spots-display {
-            text-align: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-            margin-bottom: 1.25rem;
-        }
-        .spots-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #a78bfa;
-            line-height: 1;
-        }
-        .spots-label {
-            font-size: 0.78rem;
-            color: rgba(255,255,255,0.4);
-            margin-top: 0.25rem;
-        }
-        .btn-register {
-            width: 100%;
-            padding: 0.9rem;
-            border: none;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #7c3aed, #4f46e5);
-            color: #fff;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.2s, transform 0.15s;
-            margin-bottom: 0.75rem;
-        }
-        .btn-register:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
-        .btn-register:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-        .btn-cancel-reg {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid rgba(239,68,68,0.3);
-            border-radius: 14px;
-            background: rgba(239,68,68,0.08);
-            color: #fca5a5;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-cancel-reg:hover { background: rgba(239,68,68,0.15); }
-        .register-note {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.3);
-            text-align: center;
-            margin-top: 0.75rem;
-            line-height: 1.5;
-        }
-        .register-message {
-            display: none;
-            padding: 0.65rem 0.9rem;
-            border-radius: 10px;
-            font-size: 0.83rem;
-            margin-bottom: 0.75rem;
-            text-align: center;
-        }
-        .msg-success { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.28); color: #86efac; }
-        .msg-error   { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.28); color: #fca5a5; }
-        .msg-info    { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.28); color: #93c5fd; }
-
-        /* REGISTRATIONS TABLE (admin) */
-        .reg-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
-        .reg-table th {
-            text-align: left; padding: 0.6rem 0.8rem;
-            color: rgba(255,255,255,0.35);
-            font-size: 0.7rem; letter-spacing: 0.07em; text-transform: uppercase;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .reg-table td { padding: 0.7rem 0.8rem; color: rgba(255,255,255,0.8); border-bottom: 1px solid rgba(255,255,255,0.04); }
-        .reg-badge { padding: 0.15rem 0.55rem; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
-        .reg-registered{ background: rgba(34,197,94,0.15);  color: #86efac; }
-        .reg-cancelled { background: rgba(239,68,68,0.15);  color: #fca5a5; }
-        .reg-waitlist  { background: rgba(251,191,36,0.15); color: #fde68a; }
-        .reg-attended  { background: rgba(139,92,246,0.15); color: #c4b5fd; }
-        .back-btn {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            color: rgba(255,255,255,0.5); font-size: 0.85rem;
-            text-decoration: none; margin-bottom: 1.25rem;
-            transition: color 0.15s;
-        }
-        .back-btn:hover { color: rgba(255,255,255,0.85); }
-        .skeleton {
-            background: rgba(255,255,255,0.06);
-            border-radius: 8px; animation: pulse 1.5s infinite;
-            height: 1.2rem; margin-bottom: 0.5rem;
-        }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-    </style>
+    <link rel="stylesheet" href="/css/events-style.css">
 </head>
-
 <body style="display:none;">
 
-<!-- AUTH GUARD -->
 <script>
     const token = sessionStorage.getItem("token");
-    const role  = sessionStorage.getItem("role");
     if (!token) { window.location.href = "/login"; }
     else { document.body.style.display = "block"; }
 </script>
@@ -226,10 +21,9 @@
 <div class="ambient-light light-1"></div>
 <div class="ambient-light light-2"></div>
 
-<!-- NAVBAR -->
 <nav class="navbar">
     <div class="nav-container">
-        <a id="navBrand" href="#" class="nav-brand">
+        <a id="navBrand" href="#" class="nav-brand" style="text-decoration:none;">
             <h2 class="brand-title">UniPlan</h2>
             <img src="/images/logoIcesi.png" alt="Logo Icesi" class="nav-logo">
         </a>
@@ -240,106 +34,99 @@
     </div>
 </nav>
 
-<!-- MAIN -->
 <main class="dashboard-container">
 
-    <a id="backBtn" href="#" class="back-btn">← Volver</a>
+    <a id="backBtn" href="#" class="ev-back">← Volver</a>
 
-    <!-- DETAIL GRID -->
-    <div class="detail-grid">
+    <div class="ev-detail-grid">
 
-        <!-- LEFT — INFO DEL EVENTO -->
+        <!-- ── COLUMNA PRINCIPAL ── -->
         <div>
-            <div class="glass-card" id="eventCard" style="padding:0;">
+            <div class="glass-card" id="eventCard" style="padding:0; overflow:hidden;">
 
                 <!-- HERO -->
-                <div class="event-hero">
-                    <div id="eventTypeBadge" class="event-type-badge">—</div>
-                    <h1 id="eventTitle" class="event-title">Cargando...</h1>
-                    <p id="eventDescription" class="event-description"></p>
+                <div class="ev-hero">
+                    <span id="eventTypeBadge" class="ev-type-tag">—</span>
+                    <h1 id="eventTitle" class="ev-title">Cargando...</h1>
+                    <p id="eventDescription" class="ev-description"></p>
                 </div>
 
                 <!-- FECHAS Y LUGAR -->
-                <div class="info-section">
-                    <div class="info-section-title">Fecha y lugar</div>
-                    <div class="info-row">
-                        <div class="info-item">
-                            <div class="info-label">Inicio</div>
-                            <div class="info-value" id="startDate">—</div>
+                <div class="ev-info-section">
+                    <p class="ev-info-title">Fecha y lugar</p>
+                    <div class="ev-info-row">
+                        <div class="ev-info-item">
+                            <p class="ev-info-label">Inicio</p>
+                            <p class="ev-info-value" id="startDate">—</p>
                         </div>
-                        <div class="info-item">
-                            <div class="info-label">Fin</div>
-                            <div class="info-value" id="endDate">—</div>
+                        <div class="ev-info-item">
+                            <p class="ev-info-label">Fin</p>
+                            <p class="ev-info-value" id="endDate">—</p>
                         </div>
-                        <div class="info-item">
-                            <div class="info-label">Modalidad</div>
-                            <div class="info-value" id="modality">—</div>
-                        </div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-item">
-                            <div class="info-label">Lugar</div>
-                            <div class="info-value" id="venue">—</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Campus</div>
-                            <div class="info-value" id="campus">—</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Sala</div>
-                            <div class="info-value" id="room">—</div>
+                        <div class="ev-info-item">
+                            <p class="ev-info-label">Modalidad</p>
+                            <p class="ev-info-value" id="modality">—</p>
                         </div>
                     </div>
-                    <div class="info-row" id="meetingUrlRow" style="display:none;">
-                        <div class="info-item">
-                            <div class="info-label">Enlace</div>
-                            <div class="info-value">
-                                <a id="meetingUrl" href="#" target="_blank" style="color:#a78bfa;">Unirse a la reunión</a>
-                            </div>
+                    <div class="ev-info-row" style="margin-top:0.5rem;">
+                        <div class="ev-info-item">
+                            <p class="ev-info-label">Lugar</p>
+                            <p class="ev-info-value" id="venue">—</p>
                         </div>
+                        <div class="ev-info-item">
+                            <p class="ev-info-label">Campus</p>
+                            <p class="ev-info-value" id="campus">—</p>
+                        </div>
+                        <div class="ev-info-item">
+                            <p class="ev-info-label">Sala</p>
+                            <p class="ev-info-value" id="room">—</p>
+                        </div>
+                    </div>
+                    <div id="meetingUrlRow" style="display:none; margin-top:0.5rem;">
+                        <p class="ev-info-label">Enlace</p>
+                        <a id="meetingUrl" href="#" target="_blank"
+                           style="font-size:0.9rem; color:#a78bfa;">Unirse a la reunión →</a>
                     </div>
                 </div>
 
                 <!-- CAPACIDAD -->
-                <div class="info-section">
-                    <div class="info-section-title">Capacidad</div>
-                    <div class="info-row">
-                        <div class="info-item">
-                            <div class="info-label">Total</div>
-                            <div class="info-value" id="capacityTotal">—</div>
+                <div class="ev-info-section">
+                    <p class="ev-info-title">Capacidad</p>
+                    <div class="ev-info-row">
+                        <div class="ev-info-item">
+                            <p class="ev-info-label">Total</p>
+                            <p class="ev-info-value" id="capTotal">—</p>
                         </div>
-                        <div class="info-item">
-                            <div class="info-label">Inscritos</div>
-                            <div class="info-value" id="capacityRegistered">—</div>
+                        <div class="ev-info-item">
+                            <p class="ev-info-label">Inscritos</p>
+                            <p class="ev-info-value" id="capRegistered">—</p>
                         </div>
-                        <div class="info-item">
-                            <div class="info-label">Disponibles</div>
-                            <div class="info-value" id="capacityAvailable">—</div>
+                        <div class="ev-info-item">
+                            <p class="ev-info-label">Disponibles</p>
+                            <p class="ev-info-value" id="capAvailable">—</p>
                         </div>
                     </div>
-                    <div class="capacity-bar-wrap">
-                        <div class="capacity-bar">
-                            <div class="capacity-fill" id="capacityFill" style="width:0%"></div>
-                        </div>
+                    <div class="ev-cap-bar">
+                        <div class="ev-cap-fill" id="capFill" style="width:0%"></div>
                     </div>
                 </div>
 
-                <!-- DETALLES EXTRAS -->
-                <div class="info-section" id="detailsSection" style="display:none;">
-                    <div class="info-section-title">Detalles adicionales</div>
-                    <div id="detailsContent" class="info-row" style="flex-wrap:wrap;gap:1rem;"></div>
+                <!-- DETALLES EXTRA -->
+                <div class="ev-info-section" id="detailsSection" style="display:none;">
+                    <p class="ev-info-title">Detalles adicionales</p>
+                    <div id="detailsContent" class="ev-info-row" style="flex-wrap:wrap;gap:1rem;"></div>
                 </div>
 
             </div>
 
-            <!-- LISTA DE INSCRITOS (solo admin/organizer) -->
+            <!-- LISTA DE INSCRITOS (admin/organizer) -->
             <div id="registrationsSection" style="display:none; margin-top:1.5rem;">
                 <div class="glass-card" style="padding:1.5rem;">
-                    <div class="card-header" style="margin-bottom:1rem;">
-                        <h2 style="font-size:1rem;">Estudiantes inscritos</h2>
-                        <span id="regCount" style="font-size:0.8rem; color:rgba(255,255,255,0.4);"></span>
+                    <div class="card-header" style="padding:0; margin-bottom:1rem; border:none;">
+                        <h2 style="font-size:1rem; font-weight:600;">Estudiantes inscritos</h2>
+                        <span id="regCount" style="font-size:0.8rem; color:rgba(255,255,255,0.38);"></span>
                     </div>
-                    <table class="reg-table">
+                    <table class="ev-reg-table">
                         <thead>
                             <tr>
                                 <th>Estudiante</th>
@@ -349,46 +136,50 @@
                             </tr>
                         </thead>
                         <tbody id="regTableBody">
-                            <tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3);padding:1.5rem;">Cargando inscritos...</td></tr>
+                            <tr><td colspan="4" class="ev-empty">Cargando inscritos...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT — SIDEBAR INSCRIPCION -->
-        <div class="register-card" id="registerSidebar">
+        <!-- ── SIDEBAR ── -->
+        <div class="ev-sidebar">
             <div class="glass-card">
+                <div style="padding:1.5rem;">
 
-                <div class="spots-display">
-                    <div class="spots-number" id="sidebarSpots">—</div>
-                    <div class="spots-label">cupos disponibles</div>
+                    <div class="ev-spots">
+                        <div class="ev-spots-num" id="sidebarSpots">—</div>
+                        <div class="ev-spots-label">cupos disponibles</div>
+                    </div>
+
+                    <div class="ev-status-wrap" id="statusBadgeWrap"></div>
+
+                    <div id="regMessage" class="ev-reg-msg"></div>
+
+                    <!-- ESTUDIANTE -->
+                    <div id="studentActions">
+                        <button id="btnRegister" class="ev-btn-register" onclick="registerToEvent()">
+                            Inscribirme al evento
+                        </button>
+                        <button id="btnCancelReg" class="ev-btn-cancel-reg" style="display:none;"
+                                onclick="cancelMyRegistration()">
+                            Cancelar inscripción
+                        </button>
+                        <p class="ev-reg-note" id="regNote">
+                            Al inscribirte aceptas las condiciones del evento.
+                        </p>
+                    </div>
+
+                    <!-- ADMIN / ORGANIZER -->
+                    <div id="adminActions" style="display:none;">
+                        <a id="editEventLink" href="#" class="ev-btn-register"
+                           style="text-decoration:none; display:block; text-align:center; margin-bottom:0.5rem;">
+                            Editar evento
+                        </a>
+                    </div>
+
                 </div>
-
-                <div id="statusBadgeWrap" style="text-align:center; margin-bottom:1rem;"></div>
-
-                <div id="registerMessage" class="register-message"></div>
-
-                <!-- ZONA ESTUDIANTE -->
-                <div id="studentActions">
-                    <button id="btnRegister" class="btn-register" onclick="registerToEvent()">
-                        Inscribirme al evento
-                    </button>
-                    <button id="btnCancelReg" class="btn-cancel-reg" style="display:none;" onclick="cancelMyRegistration()">
-                        Cancelar inscripción
-                    </button>
-                    <p class="register-note" id="registerNote">
-                        Al inscribirte aceptas las condiciones del evento.
-                    </p>
-                </div>
-
-                <!-- ZONA ADMIN / ORGANIZER -->
-                <div id="adminActions" style="display:none;">
-                    <a id="editEventLink" href="#" class="btn-register" style="text-decoration:none; display:block; text-align:center; margin-bottom:0.75rem;">
-                        Editar evento
-                    </a>
-                </div>
-
             </div>
         </div>
 

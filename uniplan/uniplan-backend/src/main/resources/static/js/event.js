@@ -1,470 +1,153 @@
 /* =========================================================
    CREATE EVENT
+   HTML IDs: createEventForm, title, type, description,
+             startDate, endDate, modality, venue, campus, room,
+             meetingUrlGroup, meetingUrl, capacity, waitlistEnabled,
+             details, message
+   CSS: .ev-btn-primary (submit), .ev-msg (message)
 ========================================================= */
 
-const createEventForm =
-    document.getElementById(
-        "createEventForm"
-    );
+/* ── Mostrar/ocultar meetingUrl según modalidad ── */
+document.getElementById("modality").addEventListener("change", () => {
+    const v = document.getElementById("modality").value;
+    document.getElementById("meetingUrlGroup").style.display =
+        (v === "VIRTUAL" || v === "HYBRID") ? "block" : "none";
+});
 
+/* ── Helpers ── */
+const msgDiv = document.getElementById("message");
 
-
-const messageDiv =
-    document.getElementById(
-        "message"
-    );
-
-
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function showMessage(
-    text,
-    type = "success"
-) {
-
-    messageDiv.style.display =
-        "block";
-
-
-
-    messageDiv.textContent =
-        text;
-
-
-
-    if (type === "success") {
-
-        messageDiv.style.background =
-            "rgba(34,197,94,0.12)";
-
-        messageDiv.style.border =
-            "1px solid rgba(34,197,94,0.28)";
-
-        messageDiv.style.color =
-            "#86efac";
-    }
-
-    else {
-
-        messageDiv.style.background =
-            "rgba(239,68,68,0.12)";
-
-        messageDiv.style.border =
-            "1px solid rgba(239,68,68,0.28)";
-
-        messageDiv.style.color =
-            "#fca5a5";
-    }
+function showMsg(text, type) {
+    msgDiv.className     = `ev-msg ev-msg-${type}`;
+    msgDiv.textContent   = text;
+    msgDiv.style.display = "block";
 }
 
-
-
-/* =========================================================
-   CREATE EVENT SUBMIT
-========================================================= */
-
-createEventForm.addEventListener(
-    "submit",
-
-    async (e) => {
-
-        e.preventDefault();
-
-
-
-        messageDiv.style.display =
-            "none";
-
-
-
-        /*
-         * JWT TOKEN
-         */
-
-        const token =
-            sessionStorage.getItem(
-                "token"
-            );
-
-
-
-        if (!token) {
-
-            window.location.href =
-                "/login";
-
-            return;
-        }
-
-
-
-        /*
-         * FORM VALUES
-         */
-
-        const title =
-            document.getElementById(
-                "title"
-            ).value.trim();
-
-
-
-        const description =
-            document.getElementById(
-                "description"
-            ).value.trim();
-
-
-
-        const type =
-            document.getElementById(
-                "type"
-            ).value;
-
-
-
-        const location =
-            document.getElementById(
-                "location"
-            ).value.trim();
-
-
-
-        const capacity =
-            parseInt(
-
-                document.getElementById(
-                    "capacity"
-                ).value
-            );
-
-
-
-        const startDate =
-            document.getElementById(
-                "startDate"
-            ).value;
-
-
-
-        const endDate =
-            document.getElementById(
-                "endDate"
-            ).value;
-
-
-
-        const tagsInput =
-            document.getElementById(
-                "tags"
-            ).value;
-
-
-
-        const metadataInput =
-            document.getElementById(
-                "metadata"
-            ).value;
-
-
-
-        /*
-         * VALIDATIONS
-         */
-
-        if (
-
-            !title ||
-
-            !description ||
-
-            !type ||
-
-            !location ||
-
-            !capacity ||
-
-            !startDate ||
-
-            !endDate
-        ) {
-
-            showMessage(
-                "Completa todos los campos requeridos.",
-                "error"
-            );
-
-            return;
-        }
-
-
-
-        if (capacity <= 0) {
-
-            showMessage(
-                "La capacidad debe ser mayor que 0.",
-                "error"
-            );
-
-            return;
-        }
-
-
-
-        if (
-
-            new Date(endDate)
-
-            <=
-
-            new Date(startDate)
-        ) {
-
-            showMessage(
-                "La fecha final debe ser posterior a la inicial.",
-                "error"
-            );
-
-            return;
-        }
-
-
-
-        /*
-         * TAGS
-         */
-
-        const tags =
-            tagsInput
-
-                ? tagsInput
-                    .split(",")
-                    .map(tag => tag.trim())
-                    .filter(tag => tag.length > 0)
-
-                : [];
-
-
-
-        /*
-         * METADATA
-         */
-
-        let metadata = {};
-
-
-
-        if (
-            metadataInput.trim() !== ""
-        ) {
-
-            try {
-
-                metadata =
-                    JSON.parse(
-                        metadataInput
-                    );
-            }
-
-            catch (error) {
-
-                showMessage(
-                    "El metadata JSON no es válido.",
-                    "error"
-                );
-
-                return;
-            }
-        }
-
-
-
-        /*
-         * REQUEST BODY
-         */
-
-        const body = {
-
-            title,
-
-            description,
-
-            type,
-
-            location,
-
-            capacity,
-
+function g(id)    { return document.getElementById(id)?.value?.trim() ?? ""; }
+function gInt(id) { const n = parseInt(document.getElementById(id)?.value); return isNaN(n) ? null : n; }
+function gChk(id) { return document.getElementById(id)?.checked ?? false; }
+
+/* ── Submit ── */
+document.getElementById("createEventForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msgDiv.style.display = "none";
+
+    const token = sessionStorage.getItem("token");
+    if (!token) { window.location.href = "/login"; return; }
+
+    /* Recoger valores */
+    const title       = g("title");
+    const type        = g("type");
+    const description = g("description");
+    const startDate   = g("startDate") + ":00";
+    const endDate     = g("endDate")   + ":00";
+    const modality    = g("modality");
+    const venue       = g("venue");
+    const campus      = g("campus");
+    const room        = g("room");
+    const address     = g("address");
+    const meetingUrl  = g("meetingUrl");
+    const capacity    = gInt("capacity");
+    const waitlist    = gChk("waitlistEnabled");
+    const detailsRaw  = g("details");
+    const timezone    = Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Bogota";
+
+    /* Validaciones */
+    if (!title || !type || !description || !startDate || !endDate || !modality || !venue || !capacity) {
+        showMsg("Completa todos los campos requeridos (*)", "error"); return;
+    }
+    if (capacity <= 0) {
+        showMsg("Los cupos deben ser mayor que 0.", "error"); return;
+    }
+    if (new Date(endDate) <= new Date(startDate)) {
+        showMsg("La fecha de finalización debe ser posterior a la de inicio.", "error"); return;
+    }
+    if ((modality === "VIRTUAL" || modality === "HYBRID") && !meetingUrl) {
+        showMsg("Ingresa el enlace de reunión para eventos virtuales o híbridos.", "error"); return;
+    }
+
+    let details = {};
+    if (detailsRaw) {
+        try { details = JSON.parse(detailsRaw); }
+        catch { showMsg("El JSON de detalles no es válido.", "error"); return; }
+    }
+
+    const durationMinutes = Math.round((new Date(endDate) - new Date(startDate)) / 60000);
+
+    /* Body — estructura exacta del modelo Event de MongoDB */
+    const body = {
+        title,
+        description,
+        type,
+
+        schedule: {
             startDate,
-
             endDate,
+            durationMinutes,
+            timezone
+        },
 
-            tags,
+        location: {
+            venue,
+            campus:     campus     || null,
+            room:       room       || null,
+            address:    address    || null,
+            modality,
+            meetingUrl: meetingUrl || null
+        },
 
-            metadata
-        };
+        capacity: {
+            total:           capacity,
+            registered:      0,
+            available:       capacity,
+            waitlist:        0,
+            waitlistEnabled: waitlist
+        },
 
+        /* organizer se auto-rellena en el backend desde el JWT */
+        details
+    };
 
+    /* Submit */
+    const btn  = document.querySelector(".ev-btn-primary");
+    const orig = btn.textContent;
+    btn.disabled    = true;
+    btn.textContent = "Creando evento...";
 
-        /*
-         * BUTTON LOADING
-         */
+    try {
+        const res = await fetch("/events", {
+            method: "POST",
+            headers: {
+                "Content-Type":  "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(body)
+        });
 
-        const submitButton =
-            document.querySelector(
-                ".create-event-btn"
-            );
-
-
-
-        const originalButtonText =
-            submitButton.innerHTML;
-
-
-
-        submitButton.disabled =
-            true;
-
-
-
-        submitButton.innerHTML =
-            `
-                <span>
-                    Creando evento...
-                </span>
-            `;
-
-
-
-        try {
-
-            /*
-             * API REQUEST
-             */
-
-            const response =
-                await fetch(
-
-                    "/events",
-
-                    {
-
-                        method: "POST",
-
-                        headers: {
-
-                            "Content-Type":
-                                "application/json",
-
-                            "Authorization":
-                                `Bearer ${token}`
-                        },
-
-                        body:
-                            JSON.stringify(body)
-                    }
-                );
-
-
-
-            /*
-             * ERROR RESPONSE
-             */
-
-            if (!response.ok) {
-
-                const errorText =
-                    await response.text();
-
-
-
-                throw new Error(
-                    errorText
-                );
-            }
-
-
-
-            /*
-             * SUCCESS
-             */
-
-            const data =
-                await response.json();
-
-
-
-            showMessage(
-                `Evento "${data.title}" creado correctamente.`,
-                "success"
-            );
-
-
-
-            /*
-             * RESET FORM
-             */
-
-            createEventForm.reset();
-
-
-
-            /*
-             * OPTIONAL REDIRECT
-             */
-
-            setTimeout(() => {
-
-                window.location.href =
-                    "/admin/home";
-
-            }, 1800);
-
+        if (!res.ok) {
+            const err = await res.text();
+            throw new Error(err);
         }
 
-        catch (error) {
+        const data = await res.json();
+        showMsg(`Evento "${data.title}" creado correctamente.`, "success");
+        document.getElementById("createEventForm").reset();
+        document.getElementById("meetingUrlGroup").style.display = "none";
 
-            console.error(error);
+        setTimeout(() => {
+            const role = sessionStorage.getItem("role");
+            window.location.href = role === "ORGANIZER" ? "/organizer/home" : "/admin/home";
+        }, 1800);
 
-
-
-            showMessage(
-
-                "No se pudo crear el evento.",
-
-                "error"
-            );
-        }
-
-        finally {
-
-            submitButton.disabled =
-                false;
-
-
-
-            submitButton.innerHTML =
-                originalButtonText;
-        }
+    } catch (err) {
+        console.error("Error al crear evento:", err);
+        const msg = err.message?.length < 300 ? err.message : "No se pudo crear el evento.";
+        showMsg(msg, "error");
+    } finally {
+        btn.disabled    = false;
+        btn.textContent = orig;
     }
-);
+});
 
-
-
-/* =========================================================
-   AUTO CLOSE MESSAGE
-========================================================= */
-
-document.addEventListener(
-
-    "input",
-
-    () => {
-
-        messageDiv.style.display =
-            "none";
-    }
-);
+/* Auto-ocultar mensaje al escribir */
+document.addEventListener("input", () => { msgDiv.style.display = "none"; });
