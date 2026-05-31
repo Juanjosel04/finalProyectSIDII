@@ -14,6 +14,18 @@ document.getElementById("modality").addEventListener("change", () => {
         (v === "VIRTUAL" || v === "HYBRID") ? "block" : "none";
 });
 
+/* ── Mostrar campos específicos según tipo de evento ── */
+document.getElementById("type").addEventListener("change", function () {
+    document.querySelectorAll(".ev-type-details").forEach(el => el.style.display = "none");
+    const v = this.value;
+    if (v === "CULTURAL" || v === "OTHER") {
+        document.getElementById("details-FLEXIBLE").style.display = "block";
+    } else if (v) {
+        const section = document.getElementById("details-" + v);
+        if (section) section.style.display = "block";
+    }
+});
+
 /* ── Helpers ── */
 const msgDiv = document.getElementById("message");
 
@@ -49,7 +61,6 @@ document.getElementById("createEventForm").addEventListener("submit", async (e) 
     const meetingUrl  = g("meetingUrl");
     const capacity    = gInt("capacity");
     const waitlist    = gChk("waitlistEnabled");
-    const detailsRaw  = g("details");
     const timezone    = Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Bogota";
 
     /* Validaciones */
@@ -66,10 +77,16 @@ document.getElementById("createEventForm").addEventListener("submit", async (e) 
         showMsg("Ingresa el enlace de reunión para eventos virtuales o híbridos.", "error"); return;
     }
 
-    let details = {};
-    if (detailsRaw) {
-        try { details = JSON.parse(detailsRaw); }
-        catch { showMsg("El JSON de detalles no es válido.", "error"); return; }
+    let details;
+    try {
+        details = collectDetails(type);
+    } catch (err) {
+        showMsg(err.message, "error");
+        return;
+    }
+    if (type === "VOLUNTEER" && (!details.minimumHours || details.minimumHours <= 0)) {
+        showMsg("Ingresa las horas mínimas requeridas para el voluntariado.", "error");
+        return;
     }
 
     const durationMinutes = Math.round((new Date(endDate) - new Date(startDate)) / 60000);
@@ -133,6 +150,7 @@ document.getElementById("createEventForm").addEventListener("submit", async (e) 
         showMsg(`Evento "${data.title}" creado correctamente.`, "success");
         document.getElementById("createEventForm").reset();
         document.getElementById("meetingUrlGroup").style.display = "none";
+        document.querySelectorAll(".ev-type-details").forEach(el => el.style.display = "none");
 
         setTimeout(() => {
             const role = sessionStorage.getItem("role");
@@ -151,3 +169,70 @@ document.getElementById("createEventForm").addEventListener("submit", async (e) 
 
 /* Auto-ocultar mensaje al escribir */
 document.addEventListener("input", () => { msgDiv.style.display = "none"; });
+
+/* ── Construir objeto details según tipo de evento ── */
+function collectDetails(type) {
+    const d = {};
+
+    switch (type) {
+        case "WORKSHOP": {
+            const prereq = g("prereqSubjectCode");
+            if (prereq) d.prerequisiteSubjectCode = prereq;
+            const minSem = gInt("minSemester");
+            if (minSem) d.minimumSemester = minSem;
+            const raw = document.getElementById("materialsList")?.value?.trim();
+            if (raw) d.materialsList = raw.split("\n").map(s => s.trim()).filter(Boolean);
+            break;
+        }
+        case "ACADEMIC": {
+            const name = g("speakerName");
+            if (name) {
+                d.speaker = {
+                    name,
+                    profile:     g("speakerProfile")     || null,
+                    affiliation: g("speakerAffiliation") || null
+                };
+            }
+            const su = g("streamingUrl");
+            if (su) d.streamingUrl = su;
+            const ru = g("resourcesUrl");
+            if (ru) d.resourcesUrl = ru;
+            break;
+        }
+        case "SPORT": {
+            const sport = g("sport");
+            if (sport) d.sport = sport;
+            const rules = g("tournamentRules");
+            if (rules) d.rules = rules;
+            const tc = gInt("teamsCount");
+            if (tc) d.teamsCount = tc;
+            const ppt = gInt("participantsPerTeam");
+            if (ppt) d.participantsPerTeam = ppt;
+            const structure = g("tournamentStructure");
+            if (structure) d.tournamentStructure = structure;
+            break;
+        }
+        case "VOLUNTEER": {
+            const hours = gInt("minimumHours");
+            if (hours) d.minimumHours = hours;
+            const cause = g("cause");
+            if (cause) d.cause = cause;
+            const raw = document.getElementById("activities")?.value?.trim();
+            if (raw) d.activities = raw.split("\n").map(s => s.trim()).filter(Boolean);
+            const mp = g("meetingPoints");
+            if (mp) d.meetingPoints = mp;
+            const coord = g("coordinators");
+            if (coord) d.coordinators = coord;
+            break;
+        }
+        default: { // CULTURAL, OTHER
+            const raw = g("detailsJson");
+            if (raw) {
+                try { return JSON.parse(raw); }
+                catch { throw new Error("El JSON de detalles no es válido."); }
+            }
+        }
+    }
+
+    return d;
+}

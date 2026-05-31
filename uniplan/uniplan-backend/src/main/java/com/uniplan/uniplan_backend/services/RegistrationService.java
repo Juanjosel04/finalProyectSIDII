@@ -6,6 +6,7 @@ import com.uniplan.uniplan_backend.model.document.embedded.Event;
 import com.uniplan.uniplan_backend.model.document.embedded.StudentSnapshot;
 import com.uniplan.uniplan_backend.model.relational.university.Student;
 import com.uniplan.uniplan_backend.model.relational.uniplan.User;
+import com.uniplan.uniplan_backend.repositories.EnrollmentRepository;
 import com.uniplan.uniplan_backend.repositories.EventRegistrationRepository;
 import com.uniplan.uniplan_backend.repositories.EventRepository;
 import com.uniplan.uniplan_backend.repositories.StudentRepository;
@@ -32,6 +33,7 @@ public class RegistrationService {
     private final EventRepository             eventRepository;
     private final UserRepository              userRepository;
     private final StudentRepository           studentRepository;
+    private final EnrollmentRepository        enrollmentRepository;
     private final MongoTemplate               mongoTemplate;
     private final AuditService                auditService;
 
@@ -79,13 +81,16 @@ public class RegistrationService {
                     "No es posible inscribirse: el evento está " + event.getStatus());
         }
 
-        /* ── 4. Verificar que no está ya inscrito ── */
+        /* ── 4. Verificar que no está ya inscrito (ignora canceladas) ── */
         boolean alreadyRegistered = registrationRepository
-                .existsByEventIdAndStudentUserId(eventId, user.getId().toString());
+                .existsActiveByEventIdAndStudentUserId(eventId, user.getId().toString());
 
         if (alreadyRegistered) {
             throw new IllegalStateException("Ya estás inscrito en este evento");
         }
+
+        /* ── 4b. Validaciones específicas por tipo de evento ── */
+        validateByEventType(event, user, student);
 
         /* ── 5. Decremento atómico de cupos ── */
         // Solo decrementa si capacity.available > 0.
@@ -273,6 +278,11 @@ public class RegistrationService {
                         .status(r.getStatus())
                         .registeredAt(r.getRegisteredAt())
                         .cancelledAt(r.getCancelledAt())
+                        .cancellationReason(r.getCancellationReason())
+                        .studentId(r.getStudent() != null ? r.getStudent().getStudentId() : null)
+                        .studentFirstName(r.getStudent() != null ? r.getStudent().getFirstName() : null)
+                        .studentLastName(r.getStudent() != null ? r.getStudent().getLastName() : null)
+                        .studentEmail(r.getStudent() != null ? r.getStudent().getEmail() : null)
                         .build()
                 )
                 .collect(Collectors.toList());
@@ -342,7 +352,6 @@ public class RegistrationService {
         snapshot.put("eventType",    event.getType());
         snapshot.put("validatedAt",  LocalDateTime.now().toString());
 
-        // Capacidad al momento de la inscripción
         if (event.getCapacity() != null) {
             snapshot.put("capacityAtRegistration", Map.of(
                     "total",     event.getCapacity().getTotal(),
@@ -351,5 +360,101 @@ public class RegistrationService {
             ));
         }
         return snapshot;
+    }
+
+    /*
+     * =========================================================
+     * TYPE-SPECIFIC VALIDATIONS
+     * =========================================================
+     */
+
+    private void validateByEventType(Event event, User user, Student student) {
+        if (event.getType() == null) return;
+
+        switch (event.getType().toUpperCase()) {
+            case "WORKSHOP" -> validateWorkshop(event, student);
+            case "SPORT"    -> validateSport(event, user);
+            case "VOLUNTEER"-> validateVolunteer(event);
+            // ACADEMIC, CULTURAL, OTHER: no extra validation
+        }
+    }
+
+    private void validateWorkshop(Event event, Student student) {
+        if (event.getDetails() == null) return;
+
+        Object prereqObj = event.getDetails().get("prerequisiteSubjectCode");
+        if (prereqObj != null) {
+            String prereqCode = prereqObj.toString();
+            boolean hasPrereq = enrollmentRepository
+                    .existsByStudentIdAndSubjectCode(student.getId(), prereqCode);
+            if (!hasPrereq) {
+                throw new IllegalStateException(
+                        "Debes haber cursado la materia '" + prereqCode +
+                        "' para inscribirte en este taller");
+            }
+        }
+
+        Object minSemObj = event.getDetails().get("minimumSemester");
+        if (minSemObj != null) {
+            int minSemester = Integer.parseInt(minSemObj.toString());
+            long studentSemester = enrollmentRepository
+                    .countDistinctSemestersByStudentId(student.getId());
+            if (studentSemester < minSemester) {
+                throw new IllegalStateException(
+                        "Este taller requiere estar en semestre " + minSemester +
+                        " o superior. Tu semestre actual es: " + studentSemester);
+            }
+        }
+    }
+
+    private void validateSport(Event event, User user) {
+        if (event.getSchedule() == null
+                || event.getSchedule().getStartDate() == null
+                || event.getSchedule().getEndDate() == null) {
+            return;
+        }
+
+        LocalDateTime newStart = event.getSchedule().getStartDate();
+        LocalDateTime newEnd   = event.getSchedule().getEndDate();
+
+        List<EventRegistrationDocument> activeRegs = registrationRepository
+                .findActiveByStudentUserId(user.getId().toString());
+
+        List<String> otherEventIds = activeRegs.stream()
+                .map(EventRegistrationDocument::getEventId)
+                .filter(id -> !id.equals(event.getId()))
+                .collect(Collectors.toList());
+
+        if (otherEventIds.isEmpty()) return;
+
+        List<Event> otherEvents = eventRepository.findAllById(otherEventIds);
+
+        for (Event other : otherEvents) {
+            if (!"SPORT".equals(other.getType())) continue;
+            if (other.getSchedule() == null) continue;
+
+            LocalDateTime otherStart = other.getSchedule().getStartDate();
+            LocalDateTime otherEnd   = other.getSchedule().getEndDate();
+
+            if (otherStart == null || otherEnd == null) continue;
+
+            // Overlap: A.start < B.end AND B.start < A.end
+            if (newStart.isBefore(otherEnd) && otherStart.isBefore(newEnd)) {
+                throw new IllegalStateException(
+                        "Ya estás inscrito en el torneo '" + other.getTitle() +
+                        "' que tiene un horario que se traslapa con este evento");
+            }
+        }
+    }
+
+    private void validateVolunteer(Event event) {
+        boolean hasMimimumHours = event.getDetails() != null
+                && event.getDetails().get("minimumHours") != null;
+
+        if (!hasMimimumHours) {
+            throw new IllegalStateException(
+                    "Este evento de voluntariado no tiene definidas las horas mínimas requeridas. " +
+                    "Contacta al organizador.");
+        }
     }
 }

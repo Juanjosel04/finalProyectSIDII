@@ -26,5 +26,11 @@ public interface EventRegistrationRepository
     @Query(value = "{ 'eventId': ?0, 'student.userId': ?1 }", exists = true)
     boolean existsByEventIdAndStudentUserId(String eventId, String userId);
 
+    @Query(value = "{ 'eventId': ?0, 'student.userId': ?1, 'status': { $in: ['REGISTERED', 'WAITLIST'] } }", exists = true)
+    boolean existsActiveByEventIdAndStudentUserId(String eventId, String userId);
+
+    @Query("{ 'student.userId': ?0, 'status': { $in: ['REGISTERED', 'WAITLIST'] } }")
+    List<EventRegistrationDocument> findActiveByStudentUserId(String userId);
+
     long countByEventIdAndStatus(String eventId, String status);
 }

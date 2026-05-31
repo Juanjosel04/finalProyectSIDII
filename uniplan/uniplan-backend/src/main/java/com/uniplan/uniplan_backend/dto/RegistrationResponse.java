@@ -41,4 +41,15 @@ public class RegistrationResponse {
      * Cupos disponibles restantes después de la inscripción
      */
     private Integer availableSpotsAfter;
+
+    /*
+     * Datos del estudiante (para vista admin)
+     */
+    private String studentId;
+
+    private String studentFirstName;
+
+    private String studentLastName;
+
+    private String studentEmail;
 }
