@@ -448,13 +448,6 @@ public class RegistrationService {
     }
 
     private void validateVolunteer(Event event) {
-        boolean hasMimimumHours = event.getDetails() != null
-                && event.getDetails().get("minimumHours") != null;
-
-        if (!hasMimimumHours) {
-            throw new IllegalStateException(
-                    "Este evento de voluntariado no tiene definidas las horas mínimas requeridas. " +
-                    "Contacta al organizador.");
-        }
+        // minimumHours es opcional; si está presente queda guardado en details
     }
 }

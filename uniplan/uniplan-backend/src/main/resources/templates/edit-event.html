@@ -144,15 +144,131 @@
                 </div>
             </div>
 
-            <p class="ev-section-label">Detalles adicionales</p>
+            <!-- ── DETALLES POR TIPO (aparecen según selección) ── -->
 
-            <div class="ev-field">
-                <label class="ev-label" for="details">
-                    Detalles en JSON
-                    <span class="ev-hint">speaker, tags, requirements, volunteerHours…</span>
-                </label>
-                <textarea class="ev-input" id="details" rows="3"
-                    placeholder='{"speaker":"Carlos López","tags":["IA","tecnología"]}'></textarea>
+            <!-- TALLER -->
+            <div id="details-WORKSHOP" class="ev-type-details" style="display:none;">
+                <p class="ev-section-label">Detalles del taller</p>
+                <div class="ev-row">
+                    <div class="ev-field">
+                        <label class="ev-label" for="prereqSubjectCode">Código materia prerequisito</label>
+                        <input class="ev-input" type="text" id="prereqSubjectCode" placeholder="Ej: MAT101">
+                    </div>
+                    <div class="ev-field">
+                        <label class="ev-label" for="minSemester">Semestre mínimo requerido</label>
+                        <input class="ev-input" type="number" id="minSemester" min="1" max="12" placeholder="Ej: 4">
+                    </div>
+                </div>
+                <div class="ev-field">
+                    <label class="ev-label" for="materialsList">Lista de materiales <span class="ev-hint">(uno por línea)</span></label>
+                    <textarea class="ev-input" id="materialsList" rows="3" placeholder="Laptop&#10;Cuaderno&#10;Calculadora"></textarea>
+                </div>
+            </div>
+
+            <!-- CHARLA / ACADÉMICO -->
+            <div id="details-ACADEMIC" class="ev-type-details" style="display:none;">
+                <p class="ev-section-label">Información del conferencista</p>
+                <div class="ev-row">
+                    <div class="ev-field">
+                        <label class="ev-label" for="speakerName">Nombre del conferencista</label>
+                        <input class="ev-input" type="text" id="speakerName" placeholder="Ej: Dr. Carlos López">
+                    </div>
+                    <div class="ev-field">
+                        <label class="ev-label" for="speakerAffiliation">Afiliación</label>
+                        <input class="ev-input" type="text" id="speakerAffiliation" placeholder="Ej: Universidad Nacional">
+                    </div>
+                </div>
+                <div class="ev-field">
+                    <label class="ev-label" for="speakerProfile">Perfil / Bio</label>
+                    <textarea class="ev-input" id="speakerProfile" rows="2" placeholder="Breve descripción del conferencista..."></textarea>
+                </div>
+                <div class="ev-row">
+                    <div class="ev-field">
+                        <label class="ev-label" for="streamingUrl">Enlace de streaming</label>
+                        <input class="ev-input" type="url" id="streamingUrl" placeholder="https://youtube.com/live/...">
+                    </div>
+                    <div class="ev-field">
+                        <label class="ev-label" for="resourcesUrl">Enlace de recursos</label>
+                        <input class="ev-input" type="url" id="resourcesUrl" placeholder="https://drive.google.com/...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TORNEO DEPORTIVO -->
+            <div id="details-SPORT" class="ev-type-details" style="display:none;">
+                <p class="ev-section-label">Detalles del torneo</p>
+                <div class="ev-row">
+                    <div class="ev-field">
+                        <label class="ev-label" for="sport">Tipo de deporte</label>
+                        <input class="ev-input" type="text" id="sport" placeholder="Ej: Fútbol, Baloncesto...">
+                    </div>
+                    <div class="ev-field">
+                        <label class="ev-label" for="tournamentStructure">Estructura</label>
+                        <select class="ev-input" id="tournamentStructure">
+                            <option value="">Selecciona estructura</option>
+                            <option value="ELIMINATION">Eliminación directa</option>
+                            <option value="GROUPS">Fase de grupos</option>
+                            <option value="GROUPS_ELIMINATION">Grupos + Eliminación</option>
+                            <option value="ROUND_ROBIN">Todos contra todos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="ev-row">
+                    <div class="ev-field">
+                        <label class="ev-label" for="teamsCount">Número de equipos</label>
+                        <input class="ev-input" type="number" id="teamsCount" min="2" placeholder="Ej: 8">
+                    </div>
+                    <div class="ev-field">
+                        <label class="ev-label" for="participantsPerTeam">Participantes por equipo</label>
+                        <input class="ev-input" type="number" id="participantsPerTeam" min="1" placeholder="Ej: 5">
+                    </div>
+                </div>
+                <div class="ev-field">
+                    <label class="ev-label" for="tournamentRules">Reglas del torneo</label>
+                    <textarea class="ev-input" id="tournamentRules" rows="3" placeholder="Describe las reglas específicas..."></textarea>
+                </div>
+            </div>
+
+            <!-- VOLUNTARIADO -->
+            <div id="details-VOLUNTEER" class="ev-type-details" style="display:none;">
+                <p class="ev-section-label">Detalles del voluntariado</p>
+                <div class="ev-row">
+                    <div class="ev-field">
+                        <label class="ev-label" for="minimumHours">Horas mínimas requeridas</label>
+                        <input class="ev-input" type="number" id="minimumHours" min="1" placeholder="Ej: 20">
+                    </div>
+                    <div class="ev-field">
+                        <label class="ev-label" for="cause">Causa o comunidad beneficiada</label>
+                        <input class="ev-input" type="text" id="cause" placeholder="Ej: Fundación Niños de Luz">
+                    </div>
+                </div>
+                <div class="ev-field">
+                    <label class="ev-label" for="activities">Actividades a realizar <span class="ev-hint">(una por línea)</span></label>
+                    <textarea class="ev-input" id="activities" rows="3" placeholder="Limpieza de parques&#10;Apoyo escolar&#10;Recolección de alimentos"></textarea>
+                </div>
+                <div class="ev-row">
+                    <div class="ev-field">
+                        <label class="ev-label" for="meetingPoints">Puntos de encuentro</label>
+                        <input class="ev-input" type="text" id="meetingPoints" placeholder="Ej: Entrada principal Bloque A">
+                    </div>
+                    <div class="ev-field">
+                        <label class="ev-label" for="coordinators">Responsables</label>
+                        <input class="ev-input" type="text" id="coordinators" placeholder="Ej: María González, Juan Pérez">
+                    </div>
+                </div>
+            </div>
+
+            <!-- CULTURAL / OTRO — JSON flexible -->
+            <div id="details-FLEXIBLE" class="ev-type-details" style="display:none;">
+                <p class="ev-section-label">Detalles adicionales</p>
+                <div class="ev-field">
+                    <label class="ev-label" for="detailsJson">
+                        Información extra (JSON)
+                        <span class="ev-hint">tags, recursos, etc.</span>
+                    </label>
+                    <textarea class="ev-input" id="detailsJson" rows="3"
+                        placeholder='{"tags":["cultura","arte"],"recursos":"https://..."}'></textarea>
+                </div>
             </div>
 
             <div id="message" class="ev-msg" style="display:none;"></div>

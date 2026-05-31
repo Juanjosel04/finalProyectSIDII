@@ -15,6 +15,18 @@ if (!eventId) window.location.href = "/admin/events";
 /* ── Mostrar/ocultar link de reunión ── */
 document.getElementById("modality").addEventListener("change", toggleMeetingUrl);
 
+/* ── Mostrar campos específicos según tipo ── */
+document.getElementById("type").addEventListener("change", function () {
+    document.querySelectorAll(".ev-type-details").forEach(el => el.style.display = "none");
+    const v = this.value;
+    if (v === "CULTURAL" || v === "OTHER") {
+        document.getElementById("details-FLEXIBLE").style.display = "block";
+    } else if (v) {
+        const section = document.getElementById("details-" + v);
+        if (section) section.style.display = "block";
+    }
+});
+
 function toggleMeetingUrl() {
     const v = document.getElementById("modality").value;
     document.getElementById("meetingUrlGroup").style.display =
@@ -67,9 +79,7 @@ async function loadEvent() {
                 waitlist:   e.capacity.waitlist   ?? 0
             };
         }
-        if (e.details && Object.keys(e.details).length > 0) {
-            document.getElementById("details").value = JSON.stringify(e.details, null, 2);
-        }
+        populateDetails(e.type, e.details);
     } catch (err) {
         showMsg(err.message, "error");
     }
@@ -93,7 +103,6 @@ document.getElementById("editEventForm").addEventListener("submit", async (e) =>
     const meetingUrl  = document.getElementById("meetingUrl").value.trim();
     const capacity    = parseInt(document.getElementById("capacity").value);
     const waitlist    = document.getElementById("waitlistEnabled").checked;
-    const detailsRaw  = document.getElementById("details").value.trim();
     const timezone    = Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Bogota";
 
     if (!title || !type || !description || !startDate || !endDate || !modality || !venue || !capacity) {
@@ -106,10 +115,11 @@ document.getElementById("editEventForm").addEventListener("submit", async (e) =>
         showMsg("Ingresa el enlace de reunión.", "error"); return;
     }
 
-    let details = {};
-    if (detailsRaw) {
-        try { details = JSON.parse(detailsRaw); }
-        catch { showMsg("El JSON de detalles no es válido.", "error"); return; }
+    let details;
+    try {
+        details = collectDetails(type);
+    } catch (err) {
+        showMsg(err.message, "error"); return;
     }
 
     const durationMinutes = Math.round((new Date(endDate) - new Date(startDate)) / 60000);
@@ -158,3 +168,114 @@ document.getElementById("editEventForm").addEventListener("submit", async (e) =>
 });
 
 loadEvent();
+
+/* ── Helpers para campos de tipo ── */
+function g(id)    { return document.getElementById(id)?.value?.trim() ?? ""; }
+function gInt(id) { const n = parseInt(document.getElementById(id)?.value); return isNaN(n) ? null : n; }
+function setVal(id, val) {
+    const el = document.getElementById(id);
+    if (el && val !== null && val !== undefined) el.value = val;
+}
+
+function collectDetails(type) {
+    const d = {};
+    switch (type) {
+        case "WORKSHOP": {
+            const prereq = g("prereqSubjectCode");
+            if (prereq) d.prerequisiteSubjectCode = prereq;
+            const minSem = gInt("minSemester");
+            if (minSem) d.minimumSemester = minSem;
+            const raw = document.getElementById("materialsList")?.value?.trim();
+            if (raw) d.materialsList = raw.split("\n").map(s => s.trim()).filter(Boolean);
+            break;
+        }
+        case "ACADEMIC": {
+            const name = g("speakerName");
+            if (name) {
+                d.speaker = {
+                    name,
+                    profile:     g("speakerProfile")     || null,
+                    affiliation: g("speakerAffiliation") || null
+                };
+            }
+            const su = g("streamingUrl"); if (su) d.streamingUrl = su;
+            const ru = g("resourcesUrl"); if (ru) d.resourcesUrl = ru;
+            break;
+        }
+        case "SPORT": {
+            const sport = g("sport");          if (sport) d.sport = sport;
+            const rules = g("tournamentRules"); if (rules) d.rules = rules;
+            const tc  = gInt("teamsCount");            if (tc)  d.teamsCount = tc;
+            const ppt = gInt("participantsPerTeam");   if (ppt) d.participantsPerTeam = ppt;
+            const str = g("tournamentStructure");      if (str) d.tournamentStructure = str;
+            break;
+        }
+        case "VOLUNTEER": {
+            const hours = gInt("minimumHours"); if (hours) d.minimumHours = hours;
+            const cause = g("cause");           if (cause) d.cause = cause;
+            const raw   = document.getElementById("activities")?.value?.trim();
+            if (raw) d.activities = raw.split("\n").map(s => s.trim()).filter(Boolean);
+            const mp    = g("meetingPoints");   if (mp)    d.meetingPoints = mp;
+            const coord = g("coordinators");    if (coord) d.coordinators = coord;
+            break;
+        }
+        default: {
+            const raw = g("detailsJson");
+            if (raw) {
+                try { return JSON.parse(raw); }
+                catch { throw new Error("El JSON de detalles no es válido."); }
+            }
+        }
+    }
+    return d;
+}
+
+function populateDetails(type, details) {
+    document.querySelectorAll(".ev-type-details").forEach(el => el.style.display = "none");
+    if (!type) return;
+
+    if (type === "CULTURAL" || type === "OTHER") {
+        document.getElementById("details-FLEXIBLE").style.display = "block";
+        if (details && Object.keys(details).length > 0)
+            setVal("detailsJson", JSON.stringify(details, null, 2));
+        return;
+    }
+
+    const section = document.getElementById("details-" + type);
+    if (section) section.style.display = "block";
+
+    if (!details) return;
+
+    switch (type) {
+        case "WORKSHOP":
+            setVal("prereqSubjectCode", details.prerequisiteSubjectCode);
+            setVal("minSemester",       details.minimumSemester);
+            setVal("materialsList",     Array.isArray(details.materialsList)
+                ? details.materialsList.join("\n") : details.materialsList);
+            break;
+        case "ACADEMIC":
+            if (details.speaker) {
+                setVal("speakerName",        details.speaker.name);
+                setVal("speakerProfile",     details.speaker.profile);
+                setVal("speakerAffiliation", details.speaker.affiliation);
+            }
+            setVal("streamingUrl", details.streamingUrl);
+            setVal("resourcesUrl", details.resourcesUrl);
+            break;
+        case "SPORT":
+            setVal("sport",                details.sport);
+            setVal("tournamentRules",      details.rules);
+            setVal("teamsCount",           details.teamsCount);
+            setVal("participantsPerTeam",  details.participantsPerTeam);
+            setVal("tournamentStructure",  details.tournamentStructure);
+            break;
+        case "VOLUNTEER":
+            setVal("minimumHours",  details.minimumHours);
+            setVal("cause",         details.cause);
+            setVal("activities",    Array.isArray(details.activities)
+                ? details.activities.join("\n") : details.activities);
+            setVal("meetingPoints", details.meetingPoints);
+            setVal("coordinators",  details.coordinators);
+            break;
+    }
+}

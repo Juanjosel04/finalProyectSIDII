@@ -105,13 +105,7 @@ function renderEvent(e) {
     // Detalles extras
     if (e.details && Object.keys(e.details).length > 0) {
         document.getElementById("detailsSection").style.display = "block";
-        document.getElementById("detailsContent").innerHTML =
-            Object.entries(e.details).map(([k, v]) => `
-                <div class="ev-info-item">
-                    <p class="ev-info-label">${k}</p>
-                    <p class="ev-info-value">${Array.isArray(v) ? v.join(", ") : v}</p>
-                </div>
-            `).join("");
+        document.getElementById("detailsContent").innerHTML = renderDetails(e.details);
     }
 }
 
@@ -263,14 +257,16 @@ async function loadRegistrations() {
             tbody.innerHTML = `<tr><td colspan="4" class="ev-empty">Sin inscritos aún</td></tr>`;
             return;
         }
-        tbody.innerHTML = regs.map(r => `
+        tbody.innerHTML = regs.map(r => {
+            const name = [r.studentFirstName, r.studentLastName].filter(Boolean).join(" ") || "—";
+            return `
             <tr>
-                <td>${r.studentName || "—"}</td>
+                <td>${name}</td>
                 <td>${r.studentEmail || "—"}</td>
                 <td><span class="ev-badge ev-badge-${(r.status||"").toLowerCase()}">${r.status || "—"}</span></td>
                 <td>${r.registeredAt ? fmtDate(r.registeredAt) : "—"}</td>
-            </tr>
-        `).join("");
+            </tr>`;
+        }).join("");
     } catch {
         document.getElementById("regTableBody").innerHTML =
             `<tr><td colspan="4" class="ev-empty" style="color:#fca5a5;">Error al cargar inscritos</td></tr>`;
@@ -302,6 +298,67 @@ function labelType(t) {
 }
 function labelModality(m) {
     return { IN_PERSON:"Presencial", VIRTUAL:"Virtual", HYBRID:"Híbrido" }[m] || m || "—";
+}
+
+/* ─────────────────────────────────────────────
+   RENDER DETAILS
+───────────────────────────────────────────── */
+function renderDetails(details) {
+    const LABELS = {
+        prerequisiteSubjectCode: "Materia prerequisito",
+        minimumSemester:         "Semestre mínimo",
+        materialsList:           "Materiales requeridos",
+        speaker:                 "Conferencista",
+        streamingUrl:            "Streaming",
+        resourcesUrl:            "Recursos",
+        sport:                   "Deporte",
+        rules:                   "Reglas",
+        teamsCount:              "Nº de equipos",
+        participantsPerTeam:     "Participantes por equipo",
+        tournamentStructure:     "Estructura del torneo",
+        minimumHours:            "Horas mínimas",
+        cause:                   "Causa / Comunidad",
+        activities:              "Actividades",
+        meetingPoints:           "Puntos de encuentro",
+        coordinators:            "Responsables"
+    };
+    const STRUCTURE_LABELS = {
+        ELIMINATION:         "Eliminación directa",
+        GROUPS:              "Fase de grupos",
+        GROUPS_ELIMINATION:  "Grupos + Eliminación",
+        ROUND_ROBIN:         "Todos contra todos"
+    };
+
+    function formatValue(v) {
+        if (v === null || v === undefined) return "—";
+        if (Array.isArray(v)) {
+            return `<ul style="margin:0.2rem 0 0 0; padding-left:1.2rem; line-height:1.8;">
+                ${v.map(item => `<li>${item}</li>`).join("")}
+            </ul>`;
+        }
+        if (typeof v === "object") {
+            return Object.entries(v)
+                .filter(([, val]) => val)
+                .map(([subK, subV]) => {
+                    const subLabel = LABELS[subK] || subK;
+                    return `<span style="display:block;"><strong>${subLabel}:</strong> ${subV}</span>`;
+                }).join("");
+        }
+        if (typeof v === "string" && (v.startsWith("http://") || v.startsWith("https://"))) {
+            return `<a href="${v}" target="_blank" rel="noopener"
+                       style="color:#a78bfa; word-break:break-all;">${v}</a>`;
+        }
+        return STRUCTURE_LABELS[v] || String(v);
+    }
+
+    return Object.entries(details)
+        .filter(([, v]) => v !== null && v !== undefined && v !== "")
+        .map(([k, v]) => `
+            <div class="ev-info-item" style="min-width:180px; flex:1 1 180px;">
+                <p class="ev-info-label">${LABELS[k] || k}</p>
+                <div class="ev-info-value">${formatValue(v)}</div>
+            </div>
+        `).join("");
 }
 
 loadEvent();

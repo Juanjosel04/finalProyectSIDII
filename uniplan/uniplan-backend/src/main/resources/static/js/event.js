@@ -84,10 +84,6 @@ document.getElementById("createEventForm").addEventListener("submit", async (e) 
         showMsg(err.message, "error");
         return;
     }
-    if (type === "VOLUNTEER" && (!details.minimumHours || details.minimumHours <= 0)) {
-        showMsg("Ingresa las horas mínimas requeridas para el voluntariado.", "error");
-        return;
-    }
 
     const durationMinutes = Math.round((new Date(endDate) - new Date(startDate)) / 60000);
 
