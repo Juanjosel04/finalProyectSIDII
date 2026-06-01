@@ -33,4 +33,6 @@ public interface EventRegistrationRepository
     List<EventRegistrationDocument> findActiveByStudentUserId(String userId);
 
     long countByEventIdAndStatus(String eventId, String status);
+
+    List<EventRegistrationDocument> findByEventIdIn(List<String> eventIds);
 }

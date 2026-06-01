@@ -34,6 +34,9 @@ function renderEvents(events) {
     const grid   = document.getElementById("eventsGrid");
     const active = events.filter(e => e.status === "ACTIVE");
 
+    const statEl = document.getElementById("statAvailable");
+    if (statEl) statEl.textContent = active.length;
+
     if (!active.length) {
         grid.innerHTML = `<p class="ev-empty">No hay eventos disponibles.</p>`;
         return;
@@ -106,6 +109,9 @@ async function loadMyRegistrations() {
 function renderMyRegs() {
     const container = document.getElementById("myRegsList");
     const active    = myRegs.filter(r => r.status !== "CANCELLED");
+
+    const statEl = document.getElementById("statRegistered");
+    if (statEl) statEl.textContent = active.length;
 
     if (!active.length) {
         container.innerHTML =

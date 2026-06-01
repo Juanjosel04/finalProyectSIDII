@@ -26,37 +26,19 @@
 
 </head>
 
-<script src="/js/auth.js"></script>
-<script src="/js/event.js"></script>
-
 <body style="display: none;">
 
     <!-- AUTH GUARD -->
     <script>
-
-        const token =
-            sessionStorage.getItem("token");
-
-        const role =
-            sessionStorage.getItem("role");
-
-
-
-        if (
-            !token ||
-            role !== "ADMIN"
-        ) {
-
-            window.location.href =
-                "/login";
-        }
-
-        else {
-
-            document.body.style.display =
-                "block";
-        }
-
+        (function () {
+            const token = sessionStorage.getItem("token");
+            const role  = sessionStorage.getItem("role");
+            if (!token || role !== "ADMIN") {
+                window.location.href = "/login";
+            } else {
+                document.body.style.display = "block";
+            }
+        })();
     </script>
 
 
@@ -173,8 +155,8 @@
                         Eventos Activos
                     </h3>
 
-                    <p class="stat-number">
-                        0
+                    <p class="stat-number" id="statActive">
+                        —
                     </p>
 
                 </div>
@@ -217,8 +199,8 @@
                         Usuarios Registrados
                     </h3>
 
-                    <p class="stat-number">
-                        0
+                    <p class="stat-number" id="statUsers">
+                        —
                     </p>
 
                 </div>
@@ -257,8 +239,8 @@
                         Participación Total
                     </h3>
 
-                    <p class="stat-number">
-                        0
+                    <p class="stat-number" id="statParticipation">
+                        —
                     </p>
 
                 </div>
@@ -399,21 +381,21 @@
                 <div class="announcements-list">
 
                     <a
-                            href="#"
+                            href="/admin/organizers/register"
                             class="menu-link"
                     >
                         Registrar organizador
                     </a>
 
                     <a
-                            href="#"
+                            href="/admin/organizers"
                             class="menu-link"
                     >
                         Ver organizadores
                     </a>
 
                     <a
-                            href="#"
+                            href="/admin/organizers"
                             class="menu-link"
                     >
                         Desactivar organizador
@@ -439,21 +421,21 @@
                 <div class="courses-list">
 
                     <a
-                            href="#"
+                            href="/admin/inscriptions"
                             class="menu-link"
                     >
                         Ver inscritos
                     </a>
 
                     <a
-                            href="#"
+                            href="/admin/register-attendance"
                             class="menu-link"
                     >
                         Registrar asistencia
                     </a>
 
                     <a
-                            href="#"
+                            href="/admin/spots"
                             class="menu-link"
                     >
                         Ver cupos
@@ -470,6 +452,7 @@
 
 
     <script src="/js/auth.js"></script>
+    <script src="/js/admin-home.js"></script>
 
 </body>
 </html>

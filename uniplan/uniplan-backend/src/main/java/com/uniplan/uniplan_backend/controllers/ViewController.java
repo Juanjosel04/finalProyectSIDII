@@ -76,4 +76,37 @@ public class ViewController {
 
         return "event-detail";
     }
+
+    @GetMapping("/organizer/events")
+    public String organizerEvents() { return "organizer-events"; }
+
+    @GetMapping("/organizer/events/create")
+    public String organizerCreateEvent() { return "create-event"; }
+
+    @GetMapping("/organizer/events/edit")
+    public String organizerEditEvent() { return "edit-event"; }
+
+    @GetMapping("/admin/organizers")
+    public String adminOrganizers() { return "admin-organizers"; }
+
+    @GetMapping("/admin/organizers/register")
+    public String adminRegisterOrganizer() { return "admin-register-organizer"; }
+
+    @GetMapping("/admin/inscriptions")
+    public String adminInscriptions() { return "admin-inscriptions"; }
+
+    @GetMapping("/admin/register-attendance")
+    public String adminRegisterAttendance() { return "admin-register-attendance"; }
+
+    @GetMapping("/admin/spots")
+    public String adminSpots() { return "admin-spots"; }
+
+    @GetMapping("/organizer/inscriptions")
+    public String organizerInscriptions() { return "organizer-inscriptions"; }
+
+    @GetMapping("/organizer/register-attendance")
+    public String organizerRegisterAttendance() { return "organizer-register-attendance"; }
+
+    @GetMapping("/organizer/spots")
+    public String organizerSpots() { return "organizer-spots"; }
 }

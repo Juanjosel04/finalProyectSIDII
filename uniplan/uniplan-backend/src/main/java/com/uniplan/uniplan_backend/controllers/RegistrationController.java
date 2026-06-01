@@ -1,5 +1,6 @@
 package com.uniplan.uniplan_backend.controllers;
 
+import com.uniplan.uniplan_backend.dto.AdminRegisterRequest;
 import com.uniplan.uniplan_backend.dto.RegisterToEventRequest;
 import com.uniplan.uniplan_backend.dto.RegistrationResponse;
 import com.uniplan.uniplan_backend.services.RegistrationService;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/registrations")
@@ -86,5 +88,75 @@ public class RegistrationController {
         return ResponseEntity.ok(
                 registrationService.getRegistrationsByEvent(eventId)
         );
+    }
+
+    /*
+     * =========================================================
+     * GET /registrations
+     * Todas las inscripciones de la plataforma.
+     * Role: ADMIN
+     * =========================================================
+     */
+    @GetMapping
+    public ResponseEntity<List<RegistrationResponse>> getAllRegistrations() {
+        return ResponseEntity.ok(registrationService.getAllRegistrations());
+    }
+
+    /*
+     * =========================================================
+     * POST /registrations/admin
+     * El admin inscribe a un estudiante en un evento por correo.
+     * Role: ADMIN
+     * =========================================================
+     */
+    @PostMapping("/admin")
+    public ResponseEntity<?> adminRegister(@RequestBody AdminRegisterRequest req) {
+        try {
+            RegistrationResponse response = registrationService.register(
+                    req.getEventId(),
+                    req.getStudentEmail()
+            );
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /*
+     * =========================================================
+     * GET /registrations/organizer
+     * Todas las inscripciones de los eventos del organizador.
+     * Role: ORGANIZER
+     * =========================================================
+     */
+    @GetMapping("/organizer")
+    public ResponseEntity<List<RegistrationResponse>> organizerRegistrations(Principal principal) {
+        return ResponseEntity.ok(
+                registrationService.getAllRegistrationsForOrganizer(principal.getName())
+        );
+    }
+
+    /*
+     * =========================================================
+     * POST /registrations/organizer
+     * El organizador inscribe a un estudiante en uno de sus eventos.
+     * Role: ORGANIZER
+     * =========================================================
+     */
+    @PostMapping("/organizer")
+    public ResponseEntity<?> organizerRegister(
+            @RequestBody AdminRegisterRequest req,
+            Principal principal
+    ) {
+        try {
+            RegistrationResponse response = registrationService.registerByOrganizer(
+                    req.getEventId(),
+                    req.getStudentEmail(),
+                    principal.getName()
+            );
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 }

@@ -170,6 +170,77 @@ public class RegistrationService {
 
     /*
      * =========================================================
+     * GET ALL REGISTRATIONS FOR ORGANIZER'S EVENTS
+     * =========================================================
+     */
+
+    public List<RegistrationResponse> getAllRegistrationsForOrganizer(String organizerEmail) {
+
+        User organizer = userRepository.findByEmail(organizerEmail)
+                .orElseThrow(() -> new RuntimeException("Organizador no encontrado"));
+
+        List<String> eventIds = eventRepository
+                .findByOrganizerUserId(organizer.getId().toString())
+                .stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+
+        if (eventIds.isEmpty()) return List.of();
+
+        Map<String, String> eventTitles = eventRepository.findAllById(eventIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        Event::getId,
+                        e -> e.getTitle() != null ? e.getTitle() : ""
+                ));
+
+        return registrationRepository.findByEventIdIn(eventIds)
+                .stream()
+                .map(r -> RegistrationResponse.builder()
+                        .id(r.getId())
+                        .eventId(r.getEventId())
+                        .eventCode(r.getEventCode())
+                        .eventTitle(eventTitles.getOrDefault(r.getEventId(), ""))
+                        .status(r.getStatus())
+                        .registeredAt(r.getRegisteredAt())
+                        .cancelledAt(r.getCancelledAt())
+                        .cancellationReason(r.getCancellationReason())
+                        .studentId(r.getStudent()        != null ? r.getStudent().getStudentId() : null)
+                        .studentFirstName(r.getStudent() != null ? r.getStudent().getFirstName() : null)
+                        .studentLastName(r.getStudent()  != null ? r.getStudent().getLastName()  : null)
+                        .studentEmail(r.getStudent()     != null ? r.getStudent().getEmail()      : null)
+                        .build()
+                )
+                .collect(Collectors.toList());
+    }
+
+    /*
+     * =========================================================
+     * REGISTER BY ORGANIZER (valida que el evento sea suyo)
+     * =========================================================
+     */
+
+    public RegistrationResponse registerByOrganizer(
+            String eventId, String studentEmail, String organizerEmail) {
+
+        User organizer = userRepository.findByEmail(organizerEmail)
+                .orElseThrow(() -> new RuntimeException("Organizador no encontrado"));
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+
+        boolean ownsEvent = event.getOrganizer() != null &&
+                organizer.getId().toString().equals(event.getOrganizer().getUserId());
+
+        if (!ownsEvent) {
+            throw new IllegalStateException("No tienes permiso para inscribir estudiantes en este evento");
+        }
+
+        return register(eventId, studentEmail);
+    }
+
+    /*
+     * =========================================================
      * CANCEL REGISTRATION
      * =========================================================
      * Devuelve el cupo al evento (atomic increment).
@@ -255,6 +326,48 @@ public class RegistrationService {
                         .registeredAt(r.getRegisteredAt())
                         .cancelledAt(r.getCancelledAt())
                         .cancellationReason(r.getCancellationReason())
+                        .build()
+                )
+                .collect(Collectors.toList());
+    }
+
+    /*
+     * =========================================================
+     * GET ALL REGISTRATIONS (admin — todas las inscripciones)
+     * =========================================================
+     */
+
+    public List<RegistrationResponse> getAllRegistrations() {
+
+        List<EventRegistrationDocument> all = registrationRepository.findAll();
+
+        // Batch fetch events to enrich with titles
+        List<String> eventIds = all.stream()
+                .map(EventRegistrationDocument::getEventId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<String, String> eventTitles = eventRepository.findAllById(eventIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        Event::getId,
+                        e -> e.getTitle() != null ? e.getTitle() : ""
+                ));
+
+        return all.stream()
+                .map(r -> RegistrationResponse.builder()
+                        .id(r.getId())
+                        .eventId(r.getEventId())
+                        .eventCode(r.getEventCode())
+                        .eventTitle(eventTitles.getOrDefault(r.getEventId(), ""))
+                        .status(r.getStatus())
+                        .registeredAt(r.getRegisteredAt())
+                        .cancelledAt(r.getCancelledAt())
+                        .cancellationReason(r.getCancellationReason())
+                        .studentId(r.getStudent()        != null ? r.getStudent().getStudentId() : null)
+                        .studentFirstName(r.getStudent() != null ? r.getStudent().getFirstName() : null)
+                        .studentLastName(r.getStudent()  != null ? r.getStudent().getLastName()  : null)
+                        .studentEmail(r.getStudent()     != null ? r.getStudent().getEmail()      : null)
                         .build()
                 )
                 .collect(Collectors.toList());

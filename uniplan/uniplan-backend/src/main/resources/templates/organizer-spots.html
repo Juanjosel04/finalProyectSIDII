@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>UniPlan — Cupos Disponibles</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/home-style.css">
+    <link rel="stylesheet" href="/css/events-style.css">
+</head>
+<body style="display:none;">
+
+<script>
+    (function () {
+        const token = sessionStorage.getItem("token");
+        const role  = sessionStorage.getItem("role");
+        if (!token || role !== "ORGANIZER") {
+            window.location.href = "/login";
+        } else {
+            document.body.style.display = "block";
+        }
+    })();
+</script>
+
+<div class="bg-image-layer"></div>
+<div class="bg-overlay-dark"></div>
+<div class="ambient-light light-1"></div>
+<div class="ambient-light light-2"></div>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/organizer/home" class="nav-brand" style="text-decoration:none;">
+            <h2 class="brand-title">UniPlan</h2>
+            <img src="/images/logoIcesi.png" alt="Logo Icesi" class="nav-logo">
+        </a>
+        <div class="nav-user">
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<main class="dashboard-container">
+
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Cupos de mis eventos</h1>
+        <p class="dashboard-subtitle">Disponibilidad en tiempo real de tus eventos</p>
+    </div>
+
+    <div class="glass-card" style="padding:1.5rem;">
+
+        <div class="ev-toolbar">
+            <input type="text" id="searchInput" class="ev-search"
+                   placeholder="Buscar evento..."
+                   oninput="applyFilter()">
+            <select id="statusFilter" class="ev-filter" onchange="applyFilter()">
+                <option value="ACTIVE">Solo activos</option>
+                <option value="">Todos</option>
+                <option value="FINISHED">Finalizados</option>
+                <option value="CANCELLED">Cancelados</option>
+            </select>
+        </div>
+
+        <div id="tableWrap" style="overflow-x:auto; margin-top:1rem;">
+            <p class="ev-empty">Cargando eventos...</p>
+        </div>
+
+    </div>
+
+</main>
+
+<script src="/js/auth.js"></script>
+<script src="/js/organizer-spots.js"></script>
+</body>
+</html>

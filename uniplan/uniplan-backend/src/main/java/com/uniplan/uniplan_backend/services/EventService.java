@@ -90,6 +90,22 @@ public class EventService {
 
     /*
      * =========================================================
+     * GET EVENTS BY ORGANIZER (para el panel del organizador)
+     * =========================================================
+     */
+
+    public List<EventListResponse> getMyEvents(String organizerEmail) {
+        User user = userRepository.findByEmail(organizerEmail)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return eventRepository.findByOrganizerUserId(user.getId().toString())
+                .stream()
+                .map(this::mapToListResponse)
+                .collect(Collectors.toList());
+    }
+
+    /*
+     * =========================================================
      * SEARCH EVENTS
      * =========================================================
      * Searches: title, location.venue, type

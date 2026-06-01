@@ -6,9 +6,15 @@
 ========================================================= */
 
 const token   = sessionStorage.getItem("token");
+const role    = sessionStorage.getItem("role");
 const eventId = new URLSearchParams(window.location.search).get("id");
 const msgDiv  = document.getElementById("message");
 let currentCapacity = { registered: 0, waitlist: 0 };
+
+/* Ajustar links de volver según rol */
+const eventsUrl = role === "ORGANIZER" ? "/organizer/events" : "/admin/events";
+document.getElementById("navBackBrand").href = eventsUrl;
+document.getElementById("backBtn").href      = eventsUrl;
 
 if (!eventId) window.location.href = "/admin/events";
 
@@ -159,7 +165,7 @@ document.getElementById("editEventForm").addEventListener("submit", async (e) =>
         if (!res.ok) { const d = await res.text(); throw new Error(d); }
 
         showMsg("Evento actualizado correctamente.", "success");
-        setTimeout(() => { window.location.href = "/admin/events"; }, 1500);
+        setTimeout(() => { window.location.href = eventsUrl; }, 1500);
     } catch (err) {
         showMsg(err.message?.length < 200 ? err.message : "No se pudo actualizar el evento.", "error");
     } finally {

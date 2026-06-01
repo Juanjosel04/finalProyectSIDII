@@ -31,30 +31,15 @@
 
     <!-- AUTH GUARD -->
     <script>
-
-        const token =
-            sessionStorage.getItem("token");
-
-        const role =
-            sessionStorage.getItem("role");
-
-
-
-        if (
-            !token ||
-            role !== "ORGANIZER"
-        ) {
-
-            window.location.href =
-                "/login";
-        }
-
-        else {
-
-            document.body.style.display =
-                "block";
-        }
-
+        (function () {
+            const token = sessionStorage.getItem("token");
+            const role  = sessionStorage.getItem("role");
+            if (!token || role !== "ORGANIZER") {
+                window.location.href = "/login";
+            } else {
+                document.body.style.display = "block";
+            }
+        })();
     </script>
 
 
@@ -190,8 +175,8 @@
                         Eventos Activos
                     </h3>
 
-                    <p class="stat-number">
-                        0
+                    <p class="stat-number" id="statActive">
+                        —
                     </p>
 
                 </div>
@@ -231,11 +216,11 @@
                 <div class="stat-info">
 
                     <h3>
-                        Asistentes Totales
+                        Inscritos Totales
                     </h3>
 
-                    <p class="stat-number">
-                        0
+                    <p class="stat-number" id="statAttendees">
+                        —
                     </p>
 
                 </div>
@@ -272,8 +257,8 @@
                         Eventos Finalizados
                     </h3>
 
-                    <p class="stat-number">
-                        0
+                    <p class="stat-number" id="statFinished">
+                        —
                     </p>
 
                 </div>
@@ -318,8 +303,8 @@
                         Próximo Evento
                     </h3>
 
-                    <p class="stat-number">
-                        --
+                    <p class="stat-number" id="statNext" style="font-size:1rem;">
+                        —
                     </p>
 
                 </div>
@@ -374,7 +359,7 @@
                     </a>
 
                     <a
-                            href="#"
+                            href="/organizer/events"
                             class="menu-link"
                     >
                         Eventos finalizados
@@ -400,21 +385,21 @@
                 <div class="announcements-list">
 
                     <a
-                            href="#"
+                            href="/organizer/inscriptions"
                             class="menu-link"
                     >
                         Ver inscritos
                     </a>
 
                     <a
-                            href="#"
+                            href="/organizer/register-attendance"
                             class="menu-link"
                     >
                         Registrar asistencia
                     </a>
 
                     <a
-                            href="#"
+                            href="/organizer/spots"
                             class="menu-link"
                     >
                         Cupos disponibles
@@ -471,6 +456,7 @@
 
 
     <script src="/js/auth.js"></script>
+    <script src="/js/organizer-home.js"></script>
 
 </body>
 </html>

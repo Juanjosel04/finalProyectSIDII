@@ -57,6 +57,18 @@ public class EventController {
         );
     }
 
+    /*
+     * =========================================================
+     * GET MY EVENTS (organizador autenticado)
+     * =========================================================
+     */
+
+    @GetMapping("/my")
+    public ResponseEntity<List<EventListResponse>> getMyEvents(Principal principal) {
+        String email = principal != null ? principal.getName() : null;
+        return ResponseEntity.ok(eventService.getMyEvents(email));
+    }
+
 
 
     /*

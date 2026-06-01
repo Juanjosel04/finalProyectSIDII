@@ -19,7 +19,9 @@ let myRegistration = null;
 
 /* ── Navbar según rol ── */
 document.getElementById("navRole").textContent = role || "";
-const backHref = role === "STUDENT" ? "/student/home" : "/admin/events";
+const backHref = role === "STUDENT" ? "/student/home"
+               : role === "ORGANIZER" ? "/organizer/events"
+               : "/admin/events";
 document.getElementById("navBrand").href = backHref;
 document.getElementById("backBtn").href  = backHref;
 
@@ -42,7 +44,10 @@ async function loadEvent() {
         } else {
             document.getElementById("studentActions").style.display  = "none";
             document.getElementById("adminActions").style.display    = "block";
-            document.getElementById("editEventLink").href = `/admin/events/edit?id=${eventId}`;
+            document.getElementById("editEventLink").href =
+                role === "ORGANIZER"
+                    ? `/organizer/events/edit?id=${eventId}`
+                    : `/admin/events/edit?id=${eventId}`;
             document.getElementById("registrationsSection").style.display = "block";
             await loadRegistrations();
         }

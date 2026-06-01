@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>UniPlan — Registrar Organizador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/home-style.css">
+    <link rel="stylesheet" href="/css/events-style.css">
+</head>
+<body style="display:none;">
+
+<script>
+    (function () {
+        const token = sessionStorage.getItem("token");
+        const role  = sessionStorage.getItem("role");
+        if (!token || role !== "ADMIN") {
+            window.location.href = "/login";
+        } else {
+            document.body.style.display = "block";
+        }
+    })();
+</script>
+
+<div class="bg-image-layer"></div>
+<div class="bg-overlay-dark"></div>
+<div class="ambient-light light-1"></div>
+<div class="ambient-light light-2"></div>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/admin/organizers" class="nav-brand" style="text-decoration:none;">
+            <h2 class="brand-title">UniPlan</h2>
+            <img src="/images/logoIcesi.png" alt="Logo Icesi" class="nav-logo">
+        </a>
+        <div class="nav-user">
+            <a href="/admin/organizers" class="add-btn" style="text-decoration:none;">← Ver organizadores</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<main class="dashboard-container">
+
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Registrar Organizador</h1>
+        <p class="dashboard-subtitle">Crea una cuenta de organizador directamente desde el panel de administración</p>
+    </div>
+
+    <div class="glass-card" style="padding:2rem; max-width:520px; margin:0 auto;">
+
+        <form id="registerForm" onsubmit="submitForm(event)">
+
+            <div class="ev-field-group">
+                <label class="ev-label">Correo institucional</label>
+                <input type="email" id="email" class="ev-input" placeholder="correo@icesi.edu.co" required>
+            </div>
+
+            <div class="ev-field-group">
+                <label class="ev-label">Contraseña</label>
+                <input type="password" id="password" class="ev-input" placeholder="Mínimo 8 caracteres" required minlength="8">
+            </div>
+
+            <div class="ev-field-group">
+                <label class="ev-label">ID de empleado <span style="opacity:.6;">(opcional)</span></label>
+                <input type="text" id="employeeId" class="ev-input" placeholder="ej. EMP-001">
+            </div>
+
+            <div id="formMsg" style="margin:.75rem 0; font-size:.875rem; display:none;"></div>
+
+            <div style="display:flex; gap:.75rem; margin-top:1.5rem;">
+                <button type="submit" class="add-btn" style="flex:1;">Registrar organizador</button>
+                <a href="/admin/organizers" class="logout-btn" style="text-decoration:none; display:flex; align-items:center; justify-content:center; padding:0 1.25rem;">Cancelar</a>
+            </div>
+
+        </form>
+
+    </div>
+
+</main>
+
+<script src="/js/auth.js"></script>
+<script src="/js/admin-register-organizer.js"></script>
+</body>
+</html>

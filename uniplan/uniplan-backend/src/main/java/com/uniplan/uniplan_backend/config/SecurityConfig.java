@@ -135,8 +135,19 @@ public class SecurityConfig {
                                 "/admin/events",
                                 "/admin/events/create",
                                 "/admin/events/edit",
+                                "/admin/organizers",
+                                "/admin/organizers/register",
+                                "/admin/inscriptions",
+                                "/admin/register-attendance",
+                                "/admin/spots",
                                 "/student/home",
                                 "/organizer/home",
+                                "/organizer/events",
+                                "/organizer/events/create",
+                                "/organizer/events/edit",
+                                "/organizer/inscriptions",
+                                "/organizer/register-attendance",
+                                "/organizer/spots",
                                 "/events/detail"
 
                         ).permitAll()
@@ -151,9 +162,30 @@ public class SecurityConfig {
 
                         .requestMatchers(
 
-                                "/api/admin/**"
+                                "/api/admin/**",
+                                "/admin/users/**"
 
                         ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/registrations"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/registrations/admin"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/registrations/organizer"
+                        ).hasAnyRole("ORGANIZER")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/registrations/organizer"
+                        ).hasAnyRole("ORGANIZER")
 
 
 
