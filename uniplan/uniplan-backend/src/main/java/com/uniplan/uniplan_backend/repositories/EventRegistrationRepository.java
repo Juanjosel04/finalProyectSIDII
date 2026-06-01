@@ -35,4 +35,7 @@ public interface EventRegistrationRepository
     long countByEventIdAndStatus(String eventId, String status);
 
     List<EventRegistrationDocument> findByEventIdIn(List<String> eventIds);
+
+    @Query("{ 'eventId': ?0, 'student.studentId': ?1 }")
+    Optional<EventRegistrationDocument> findByEventIdAndStudentCode(String eventId, String studentCode);
 }

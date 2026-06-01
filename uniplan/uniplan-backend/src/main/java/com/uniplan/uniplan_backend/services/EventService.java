@@ -21,9 +21,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventService {
 
-    private final EventRepository eventRepository;
-    private final UserRepository  userRepository;
-    private final AuditService    auditService;
+    private final EventRepository         eventRepository;
+    private final UserRepository          userRepository;
+    private final AuditService            auditService;
+    private final EventStatisticService   statisticService;
 
     /*
      * =========================================================
@@ -67,6 +68,8 @@ public class EventService {
                 "CREATE", Map.of("role", "SYSTEM"), null,
                 Map.of("title", savedEvent.getTitle(), "status", "ACTIVE")
         );
+
+        statisticService.syncEventAsync(savedEvent.getId());
 
         return new EventResponse(
                 savedEvent.getId(),
@@ -183,6 +186,8 @@ public class EventService {
                 Map.of("status", Map.of("from", "ACTIVE", "to", "CANCELLED"))
         );
 
+        statisticService.syncEventAsync(updated.getId());
+
         return new EventResponse(updated.getId(), updated.getTitle(), updated.getStatus());
     }
 
@@ -213,6 +218,8 @@ public class EventService {
                 "UPDATE", Map.of("role", "SYSTEM"), null,
                 Map.of("title", updated.getTitle(), "updatedAt", updated.getUpdatedAt().toString())
         );
+
+        statisticService.syncEventAsync(updated.getId());
 
         return new EventResponse(updated.getId(), updated.getTitle(), updated.getStatus());
     }

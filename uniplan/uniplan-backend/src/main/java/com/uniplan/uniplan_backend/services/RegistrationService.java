@@ -36,6 +36,7 @@ public class RegistrationService {
     private final EnrollmentRepository        enrollmentRepository;
     private final MongoTemplate               mongoTemplate;
     private final AuditService                auditService;
+    private final EventStatisticService       statisticService;
 
     /*
      * =========================================================
@@ -58,6 +59,18 @@ public class RegistrationService {
      */
 
     public RegistrationResponse register(String eventId, String userEmail) {
+        return registerCore(eventId, userEmail, null);
+    }
+
+    public RegistrationResponse registerWithCaller(String eventId, String studentEmail, String callerEmail) {
+        User caller = userRepository.findByEmail(callerEmail).orElse(null);
+        Map<String, Object> callerPerformedBy = caller != null
+                ? auditService.buildPerformedBy(caller.getId().toString(), caller.getEmail(), caller.getRole())
+                : null;
+        return registerCore(eventId, studentEmail, callerPerformedBy);
+    }
+
+    private RegistrationResponse registerCore(String eventId, String userEmail, Map<String, Object> callerOverride) {
 
         /* ── 1. Buscar usuario en PostgreSQL ── */
         User user = userRepository.findByEmail(userEmail)
@@ -122,7 +135,7 @@ public class RegistrationService {
             }
 
             // Inscribir en lista de espera (sin decrementar cupos)
-            return registerToWaitlist(eventId, event, user, student);
+            return registerToWaitlist(eventId, event, user, student, callerOverride);
         }
 
         /* ── 6. Construir snapshot y crear registro ── */
@@ -146,13 +159,19 @@ public class RegistrationService {
         EventRegistrationDocument saved = registrationRepository.save(registration);
 
         /* ── 7. Auditoría ── */
+        Map<String, Object> auditPerformedBy = callerOverride != null
+                ? callerOverride
+                : auditService.buildPerformedBy(user.getId().toString(), user.getEmail(), user.getRole());
+
         auditService.log(
                 "REGISTRATION", saved.getId(), eventId,
                 "REGISTER",
-                auditService.buildPerformedBy(user.getId().toString(), user.getEmail(), user.getRole()),
+                auditPerformedBy,
                 Map.of("eventId", eventId, "eventTitle", event.getTitle() != null ? event.getTitle() : ""),
                 Map.of("status", "REGISTERED", "studentId", student.getId())
         );
+
+        statisticService.syncEventAsync(eventId);
 
         int availableAfter = updatedEvent.getCapacity() != null
                 ? updatedEvent.getCapacity().getAvailable() : 0;
@@ -216,6 +235,109 @@ public class RegistrationService {
 
     /*
      * =========================================================
+     * REGISTER ATTENDANCE
+     * =========================================================
+     *
+     * Validaciones:
+     *  1. El evento existe
+     *  2. Si es ORGANIZER, el evento le pertenece
+     *  3. Existe una inscripción activa (REGISTERED) con ese studentCode
+     *  4. No tiene ya asistencia registrada (no es ATTENDED)
+     *  5. Actualiza status → ATTENDED y guarda attendedAt
+     *
+     * =========================================================
+     */
+
+    public RegistrationResponse registerAttendance(
+            String eventId, String studentCode, String callerEmail) {
+
+        /* ── Validar campos requeridos ── */
+        if (studentCode == null || studentCode.trim().isEmpty()) {
+            throw new IllegalArgumentException("El código de estudiante es obligatorio");
+        }
+
+        /* ── Buscar evento ── */
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+
+        /* ── Buscar caller y verificar ownership si es ORGANIZER ── */
+        User caller = userRepository.findByEmail(callerEmail)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if ("ORGANIZER".equals(caller.getRole())) {
+            boolean owns = event.getOrganizer() != null &&
+                    caller.getId().toString().equals(event.getOrganizer().getUserId());
+            if (!owns) {
+                throw new IllegalStateException(
+                        "No tienes permiso para registrar asistencia en este evento");
+            }
+        }
+
+        /* ── Buscar inscripción por eventId + studentCode ── */
+        EventRegistrationDocument reg = registrationRepository
+                .findByEventIdAndStudentCode(eventId, studentCode.trim())
+                .orElseThrow(() -> new RuntimeException(
+                        "No se encontró ninguna inscripción para el código '" +
+                        studentCode.trim() + "' en este evento"));
+
+        /* ── Validar estado ── */
+        switch (reg.getStatus()) {
+            case "ATTENDED"  -> throw new IllegalStateException(
+                    "La asistencia de este estudiante ya fue registrada");
+            case "CANCELLED" -> throw new IllegalStateException(
+                    "La inscripción de este estudiante está cancelada");
+            case "WAITLIST"  -> throw new IllegalStateException(
+                    "El estudiante está en lista de espera, no tiene inscripción confirmada");
+            case "REJECTED"  -> throw new IllegalStateException(
+                    "La inscripción de este estudiante fue rechazada");
+        }
+
+        if (!"REGISTERED".equals(reg.getStatus())) {
+            throw new IllegalStateException(
+                    "Estado de inscripción no válido para registrar asistencia: " + reg.getStatus());
+        }
+
+        /* ── Actualizar a ATTENDED ── */
+        LocalDateTime now = LocalDateTime.now();
+        reg.setStatus("ATTENDED");
+        reg.setAttendedAt(now);
+        reg.setUpdatedAt(now);
+
+        EventRegistrationDocument saved = registrationRepository.save(reg);
+
+        /* ── Auditoría ── */
+        auditService.log(
+                "REGISTRATION", saved.getId(), eventId,
+                "ATTEND",
+                auditService.buildPerformedBy(
+                        caller.getId().toString(), caller.getEmail(), caller.getRole()),
+                Map.of("eventId", eventId, "eventTitle", event.getTitle() != null ? event.getTitle() : ""),
+                Map.of("status", Map.of("from", "REGISTERED", "to", "ATTENDED"),
+                       "studentCode", studentCode.trim())
+        );
+
+        statisticService.syncEventAsync(eventId);
+
+        String studentName = saved.getStudent() != null
+                ? (saved.getStudent().getFirstName() + " " + saved.getStudent().getLastName()).trim()
+                : studentCode;
+
+        return RegistrationResponse.builder()
+                .id(saved.getId())
+                .eventId(saved.getEventId())
+                .eventCode(saved.getEventCode())
+                .eventTitle(event.getTitle())
+                .status(saved.getStatus())
+                .attendedAt(saved.getAttendedAt())
+                .studentId(studentCode.trim())
+                .studentFirstName(saved.getStudent() != null ? saved.getStudent().getFirstName() : null)
+                .studentLastName(saved.getStudent()  != null ? saved.getStudent().getLastName()  : null)
+                .studentEmail(saved.getStudent()     != null ? saved.getStudent().getEmail()      : null)
+                .build();
+    }
+
+    /*
+     * =========================================================
      * REGISTER BY ORGANIZER (valida que el evento sea suyo)
      * =========================================================
      */
@@ -236,7 +358,7 @@ public class RegistrationService {
             throw new IllegalStateException("No tienes permiso para inscribir estudiantes en este evento");
         }
 
-        return register(eventId, studentEmail);
+        return registerWithCaller(eventId, studentEmail, organizerEmail);
     }
 
     /*
@@ -285,6 +407,8 @@ public class RegistrationService {
                     .inc("capacity.registered", -1);
             mongoTemplate.updateFirst(restoreQuery, restoreUpdate, Event.class);
         }
+
+        statisticService.syncEventAsync(registration.getEventId());
 
         /* Auditoría ── */
         auditService.log(
@@ -408,7 +532,7 @@ public class RegistrationService {
      */
 
     private RegistrationResponse registerToWaitlist(
-            String eventId, Event event, User user, Student student) {
+            String eventId, Event event, User user, Student student, Map<String, Object> callerOverride) {
 
         StudentSnapshot snapshot = buildStudentSnapshot(user, student);
         Map<String, Object> validationSnapshot = buildValidationSnapshot(user, student, event);
@@ -427,13 +551,19 @@ public class RegistrationService {
 
         EventRegistrationDocument saved = registrationRepository.save(registration);
 
+        Map<String, Object> auditPerformedBy = callerOverride != null
+                ? callerOverride
+                : auditService.buildPerformedBy(user.getId().toString(), user.getEmail(), user.getRole());
+
         auditService.log(
                 "REGISTRATION", saved.getId(), eventId,
                 "WAITLIST",
-                auditService.buildPerformedBy(user.getId().toString(), user.getEmail(), user.getRole()),
+                auditPerformedBy,
                 Map.of("eventId", eventId),
                 Map.of("status", "WAITLIST")
         );
+
+        statisticService.syncEventAsync(eventId);
 
         return RegistrationResponse.builder()
                 .id(saved.getId())

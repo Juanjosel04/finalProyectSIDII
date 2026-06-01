@@ -109,4 +109,19 @@ public class ViewController {
 
     @GetMapping("/organizer/spots")
     public String organizerSpots() { return "organizer-spots"; }
+
+    @GetMapping("/admin/attendance")
+    public String adminAttendance() { return "admin-attendance"; }
+
+    @GetMapping("/organizer/attendance")
+    public String organizerAttendance() { return "organizer-attendance"; }
+
+    @GetMapping("/profile")
+    public String profile() { return "profile"; }
+
+    @GetMapping("/admin/reports")
+    public String adminReports() { return "admin-reports"; }
+
+    @GetMapping("/student/my-report")
+    public String studentMyReport() { return "student-report"; }
 }

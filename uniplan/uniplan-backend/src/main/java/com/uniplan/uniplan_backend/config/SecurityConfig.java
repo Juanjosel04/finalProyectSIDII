@@ -139,16 +139,21 @@ public class SecurityConfig {
                                 "/admin/organizers/register",
                                 "/admin/inscriptions",
                                 "/admin/register-attendance",
+                                "/admin/attendance",
                                 "/admin/spots",
+                                "/admin/reports",
                                 "/student/home",
+                                "/student/my-report",
                                 "/organizer/home",
                                 "/organizer/events",
                                 "/organizer/events/create",
                                 "/organizer/events/edit",
                                 "/organizer/inscriptions",
                                 "/organizer/register-attendance",
+                                "/organizer/attendance",
                                 "/organizer/spots",
-                                "/events/detail"
+                                "/events/detail",
+                                "/profile"
 
                         ).permitAll()
 
@@ -160,10 +165,23 @@ public class SecurityConfig {
                          |--------------------------------------------------------------------------
                          */
 
+                        /* Student can access their own participation report */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/reports/my-participation"
+                        ).hasRole("STUDENT")
+
+                        /* Organizers can export attendance of their own events */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/reports/attendance/export"
+                        ).hasAnyRole("ADMIN", "ORGANIZER")
+
                         .requestMatchers(
 
                                 "/api/admin/**",
-                                "/admin/users/**"
+                                "/admin/users/**",
+                                "/reports/**"
 
                         ).hasRole("ADMIN")
 
@@ -176,6 +194,11 @@ public class SecurityConfig {
                                 HttpMethod.POST,
                                 "/registrations/admin"
                         ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/registrations/attendance"
+                        ).hasAnyRole("ADMIN", "ORGANIZER")
 
                         .requestMatchers(
                                 HttpMethod.GET,

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>UniPlan — Mi Perfil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/home-style.css">
+    <link rel="stylesheet" href="/css/events-style.css">
+</head>
+<body style="display:none;">
+
+<script>
+    (function () {
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+            window.location.href = "/login";
+        } else {
+            document.body.style.display = "block";
+        }
+    })();
+</script>
+
+<div class="bg-image-layer"></div>
+<div class="bg-overlay-dark"></div>
+<div class="ambient-light light-1"></div>
+<div class="ambient-light light-2"></div>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a id="homeLink" href="#" class="nav-brand" style="text-decoration:none;">
+            <h2 class="brand-title">UniPlan</h2>
+            <img src="/images/logoIcesi.png" alt="Logo Icesi" class="nav-logo">
+        </a>
+        <div class="nav-user">
+            <span class="user-role" id="navRole"></span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<main class="dashboard-container">
+
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Mi Perfil</h1>
+        <p class="dashboard-subtitle">Información de tu cuenta en UniPlan</p>
+    </div>
+
+    <div style="max-width:600px; margin:0 auto;">
+
+        <!-- Avatar + nombre -->
+        <div class="glass-card" style="padding:2rem; display:flex; align-items:center; gap:1.5rem; margin-bottom:1.25rem;">
+            <div id="bigAvatar" style="
+                width:72px; height:72px; border-radius:50%;
+                background:linear-gradient(135deg,#7c3aed,#4f46e5);
+                display:flex; align-items:center; justify-content:center;
+                font-size:2rem; font-weight:700; color:#fff; flex-shrink:0;">
+                ?
+            </div>
+            <div>
+                <h2 id="fullName" style="margin:0; font-size:1.35rem; font-weight:700;">—</h2>
+                <p id="roleLabel" style="margin:.25rem 0 0; opacity:.65; font-size:.9rem;"></p>
+            </div>
+        </div>
+
+        <!-- Datos de la cuenta -->
+        <div class="glass-card" style="padding:1.75rem; margin-bottom:1.25rem;">
+            <h3 style="margin:0 0 1.25rem; font-size:1rem; opacity:.7; text-transform:uppercase; letter-spacing:.05em;">
+                Cuenta UniPlan
+            </h3>
+            <div id="accountFields" style="display:flex; flex-direction:column; gap:.85rem;">
+                <p class="ev-empty">Cargando...</p>
+            </div>
+        </div>
+
+        <!-- Datos institucionales -->
+        <div class="glass-card" id="institutionalCard" style="padding:1.75rem; display:none;">
+            <h3 style="margin:0 0 1.25rem; font-size:1rem; opacity:.7; text-transform:uppercase; letter-spacing:.05em;">
+                Datos institucionales
+            </h3>
+            <div id="institutionalFields" style="display:flex; flex-direction:column; gap:.85rem;"></div>
+        </div>
+
+    </div>
+
+</main>
+
+<script src="/js/auth.js"></script>
+<script src="/js/profile.js"></script>
+</body>
+</html>

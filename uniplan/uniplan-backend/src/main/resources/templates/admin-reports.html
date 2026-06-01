@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>UniPlan — Reportes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/home-style.css">
+    <link rel="stylesheet" href="/css/events-style.css">
+</head>
+<body style="display:none;">
+
+<script>
+    (function () {
+        const t = sessionStorage.getItem("token"), r = sessionStorage.getItem("role");
+        if (!t || r !== "ADMIN") { window.location.href = "/login"; }
+        else { document.body.style.display = "block"; }
+    })();
+</script>
+
+<div class="bg-image-layer"></div>
+<div class="bg-overlay-dark"></div>
+<div class="ambient-light light-1"></div>
+<div class="ambient-light light-2"></div>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/admin/home" class="nav-brand" style="text-decoration:none;">
+            <h2 class="brand-title">UniPlan</h2>
+            <img src="/images/logoIcesi.png" alt="Logo Icesi" class="nav-logo">
+        </a>
+        <div class="nav-user">
+            <button class="add-btn" style="font-size:.8rem;" onclick="triggerSync()" title="Sincronizar estadísticas manualmente">↻ Sincronizar BD</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<main class="dashboard-container">
+
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Reportes y Auditoría</h1>
+        <p class="dashboard-subtitle">Datos combinados PostgreSQL + MongoDB · tabla <code style="opacity:.65;font-size:.85em;">event_statistics</code> sincronizada automáticamente</p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="stats-grid">
+        <div class="stat-card glass-card"><div class="stat-info"><h3>Usuarios registrados</h3><p class="stat-number" id="sTotal">—</p></div></div>
+        <div class="stat-card glass-card"><div class="stat-info"><h3>Eventos activos</h3><p class="stat-number" id="sActiveEvents">—</p></div></div>
+        <div class="stat-card glass-card"><div class="stat-info"><h3>Inscripciones</h3><p class="stat-number" id="sRegs">—</p></div></div>
+        <div class="stat-card glass-card"><div class="stat-info"><h3>Acciones auditadas</h3><p class="stat-number" id="sAudit">—</p></div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="glass-card" style="padding:1.5rem; margin-top:1.25rem;">
+
+        <div style="display:flex; gap:.5rem; margin-bottom:1.25rem; flex-wrap:wrap;">
+            <button class="ev-chip active" onclick="showTab('events',this)">Participación por Evento</button>
+            <button class="ev-chip" onclick="showTab('organizers',this)">Actividad de Organizadores</button>
+            <button class="ev-chip" onclick="showTab('analytics',this)">Análisis por Tipo ✦</button>
+            <button class="ev-chip" onclick="showTab('audit',this)">Log de Auditoría</button>
+        </div>
+
+        <!-- Tab: Eventos -->
+        <div id="tab-events">
+            <div style="display:flex; justify-content:flex-end; margin-bottom:.75rem;">
+                <button class="add-btn" style="font-size:.8rem;" onclick="downloadCsv('/reports/events/export','eventos-estadisticas.csv')">⬇ Exportar CSV</button>
+            </div>
+            <p id="eventsLoading" class="ev-empty">Cargando...</p>
+            <div id="eventsTable" style="overflow-x:auto;"></div>
+        </div>
+
+        <!-- Tab: Organizadores -->
+        <div id="tab-organizers" style="display:none;">
+            <div style="display:flex; justify-content:flex-end; margin-bottom:.75rem;">
+                <button class="add-btn" style="font-size:.8rem;" onclick="downloadCsv('/reports/organizers/export','actividad-organizadores.csv')">⬇ Exportar CSV</button>
+            </div>
+            <p id="orgsLoading" class="ev-empty">Cargando...</p>
+            <div id="orgsTable" style="overflow-x:auto;"></div>
+        </div>
+
+        <!-- Tab: Análisis por tipo — REPORTE INNOVADOR -->
+        <div id="tab-analytics" style="display:none;">
+            <p id="analyticsLoading" class="ev-empty">Cargando análisis...</p>
+            <div id="analyticsContent"></div>
+        </div>
+
+        <!-- Tab: Auditoría -->
+        <div id="tab-audit" style="display:none;">
+            <p id="auditLoading" class="ev-empty">Cargando...</p>
+            <div id="auditTable" style="overflow-x:auto;"></div>
+        </div>
+
+    </div>
+
+</main>
+
+<script src="/js/auth.js"></script>
+<script src="/js/admin-reports.js"></script>
+</body>
+</html>

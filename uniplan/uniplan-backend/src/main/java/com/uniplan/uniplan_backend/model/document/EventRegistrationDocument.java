@@ -65,6 +65,8 @@ public class EventRegistrationDocument {
 
     private String rejectionReason;
 
+    private LocalDateTime attendedAt;
+
     /*
      * Audit
      */

@@ -15,4 +15,8 @@ public interface AuditLogRepository
     List<AuditLog> findByActionOrderByCreatedAtDesc(String action);
 
     List<AuditLog> findTop50ByOrderByCreatedAtDesc();
+
+    List<AuditLog> findTop100ByOrderByCreatedAtDesc();
+
+    List<AuditLog> findByEntityOrderByCreatedAtDesc(String entity);
 }

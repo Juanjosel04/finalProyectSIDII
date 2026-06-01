@@ -1,6 +1,7 @@
 package com.uniplan.uniplan_backend.controllers;
 
 import com.uniplan.uniplan_backend.dto.AdminRegisterRequest;
+import com.uniplan.uniplan_backend.dto.AttendanceRequest;
 import com.uniplan.uniplan_backend.dto.RegisterToEventRequest;
 import com.uniplan.uniplan_backend.dto.RegistrationResponse;
 import com.uniplan.uniplan_backend.services.RegistrationService;
@@ -110,11 +111,12 @@ public class RegistrationController {
      * =========================================================
      */
     @PostMapping("/admin")
-    public ResponseEntity<?> adminRegister(@RequestBody AdminRegisterRequest req) {
+    public ResponseEntity<?> adminRegister(@RequestBody AdminRegisterRequest req, Principal principal) {
         try {
-            RegistrationResponse response = registrationService.register(
+            RegistrationResponse response = registrationService.registerWithCaller(
                     req.getEventId(),
-                    req.getStudentEmail()
+                    req.getStudentEmail(),
+                    principal.getName()
             );
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
@@ -134,6 +136,31 @@ public class RegistrationController {
         return ResponseEntity.ok(
                 registrationService.getAllRegistrationsForOrganizer(principal.getName())
         );
+    }
+
+    /*
+     * =========================================================
+     * POST /registrations/attendance
+     * Registra la asistencia de un estudiante a un evento.
+     * Role: ADMIN | ORGANIZER
+     * =========================================================
+     */
+    @PostMapping("/attendance")
+    public ResponseEntity<?> registerAttendance(
+            @RequestBody AttendanceRequest req,
+            Principal principal
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    registrationService.registerAttendance(
+                            req.getEventId(),
+                            req.getStudentCode(),
+                            principal.getName()
+                    )
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     /*

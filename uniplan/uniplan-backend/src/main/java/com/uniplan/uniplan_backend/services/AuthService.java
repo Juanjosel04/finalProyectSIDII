@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -34,6 +35,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final AuditService auditService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -57,6 +59,14 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+
+        auditService.log(
+                "USER", user.getId().toString(), user.getEmail(),
+                "REGISTER",
+                auditService.buildPerformedBy(user.getId().toString(), user.getEmail(), user.getRole()),
+                null,
+                Map.of("role", user.getRole(), "status", "ACTIVE")
+        );
 
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 user.getEmail(),

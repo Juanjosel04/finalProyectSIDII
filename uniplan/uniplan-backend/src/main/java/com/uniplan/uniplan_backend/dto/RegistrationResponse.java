@@ -32,6 +32,8 @@ public class RegistrationResponse {
 
     private String cancellationReason;
 
+    private LocalDateTime attendedAt;
+
     /*
      * Nombre del evento (snapshot para mostrar en el dashboard)
      */
