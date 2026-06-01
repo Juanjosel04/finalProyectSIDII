@@ -1,8 +1,13 @@
 package com.uniplan.uniplan_backend.controllers;
 
 import com.uniplan.uniplan_backend.dto.CreateOrganizerRequest;
+import com.uniplan.uniplan_backend.dto.UserDetailResponse;
 import com.uniplan.uniplan_backend.dto.UserListResponse;
+import com.uniplan.uniplan_backend.model.relational.university.Employee;
+import com.uniplan.uniplan_backend.model.relational.university.Student;
 import com.uniplan.uniplan_backend.model.relational.uniplan.User;
+import com.uniplan.uniplan_backend.repositories.EmployeeRepository;
+import com.uniplan.uniplan_backend.repositories.StudentRepository;
 import com.uniplan.uniplan_backend.repositories.UserRepository;
 import com.uniplan.uniplan_backend.services.AuditService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -22,9 +28,11 @@ import java.util.stream.Collectors;
 @CrossOrigin
 public class UserAdminController {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuditService auditService;
+    private final UserRepository     userRepository;
+    private final PasswordEncoder    passwordEncoder;
+    private final AuditService       auditService;
+    private final StudentRepository  studentRepository;
+    private final EmployeeRepository employeeRepository;
 
     @GetMapping("/count")
     public ResponseEntity<Map<String, Long>> getUserCount() {
@@ -143,6 +151,48 @@ public class UserAdminController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<UserDetailResponse>> getAllUsers() {
+        List<UserDetailResponse> result = userRepository.findAll()
+                .stream()
+                .map(this::toDetailResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+
+    private UserDetailResponse toDetailResponse(User user) {
+        UserDetailResponse.UserDetailResponseBuilder builder = UserDetailResponse.builder()
+                .id(user.getId().toString())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .status(user.getStatus());
+
+        switch (user.getRole()) {
+            case "STUDENT" -> {
+                builder.institutionalId(user.getStudentId());
+                if (user.getStudentId() != null) {
+                    Optional<Student> s = studentRepository.findById(user.getStudentId());
+                    s.ifPresent(st -> builder
+                            .firstName(st.getFirstName())
+                            .lastName(st.getLastName())
+                            .campus(st.getCampus() != null ? st.getCampus().toString() : null));
+                }
+            }
+            case "ORGANIZER", "ADMIN" -> {
+                builder.institutionalId(user.getEmployeeId());
+                if (user.getEmployeeId() != null) {
+                    Optional<Employee> e = employeeRepository.findById(user.getEmployeeId());
+                    e.ifPresent(emp -> builder
+                            .firstName(emp.getFirstName())
+                            .lastName(emp.getLastName())
+                            .employeeType(emp.getEmployeeType())
+                            .contractType(emp.getContractType()));
+                }
+            }
+        }
+        return builder.build();
     }
 
     private Map<String, Object> buildPerformedBy(Principal principal) {

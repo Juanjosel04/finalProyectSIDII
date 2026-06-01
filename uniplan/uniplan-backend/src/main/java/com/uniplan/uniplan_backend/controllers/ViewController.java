@@ -124,4 +124,13 @@ public class ViewController {
 
     @GetMapping("/student/my-report")
     public String studentMyReport() { return "student-report"; }
+
+    @GetMapping("/admin/users/list")
+    public String adminUsersList() { return "admin-users"; }
+
+    @GetMapping("/admin/view-attendances")
+    public String adminViewAttendances() { return "view-attendances"; }
+
+    @GetMapping("/organizer/view-attendances")
+    public String organizerViewAttendances() { return "view-attendances"; }
 }

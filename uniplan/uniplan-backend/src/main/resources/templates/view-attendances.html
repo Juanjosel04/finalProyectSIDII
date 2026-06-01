@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>UniPlan — Asistencias por Evento</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/home-style.css">
+    <link rel="stylesheet" href="/css/events-style.css">
+</head>
+<body style="display:none;">
+
+<script>
+    (function () {
+        const token = sessionStorage.getItem("token");
+        const role  = sessionStorage.getItem("role");
+        if (!token || (role !== "ADMIN" && role !== "ORGANIZER")) {
+            window.location.href = "/login";
+        } else {
+            document.body.style.display = "block";
+        }
+    })();
+</script>
+
+<div class="bg-image-layer"></div>
+<div class="bg-overlay-dark"></div>
+<div class="ambient-light light-1"></div>
+<div class="ambient-light light-2"></div>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a id="homeLink" href="#" class="nav-brand" style="text-decoration:none;">
+            <h2 class="brand-title">UniPlan</h2>
+            <img src="/images/logoIcesi.png" alt="Logo Icesi" class="nav-logo">
+        </a>
+        <div class="nav-user">
+            <a id="attendanceLink" href="#" class="add-btn" style="text-decoration:none;">Registrar asistencia</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<main class="dashboard-container">
+
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Asistencias por Evento</h1>
+        <p class="dashboard-subtitle">Consulta quién ha asistido a cada evento</p>
+    </div>
+
+    <div class="glass-card" style="padding:1.5rem;">
+
+        <div style="display:flex; gap:1rem; align-items:flex-end; flex-wrap:wrap; margin-bottom:1.25rem;">
+            <div style="flex:1; min-width:260px;">
+                <label class="ev-label" style="display:block; margin-bottom:.4rem;">Selecciona un evento</label>
+                <select id="eventSelect" class="ev-input" onchange="loadAttendances()" style="width:100%;">
+                    <option value="">Cargando eventos...</option>
+                </select>
+            </div>
+            <div>
+                <label class="ev-label" style="display:block; margin-bottom:.4rem;">Buscar</label>
+                <input type="text" id="searchInput" class="ev-input"
+                       placeholder="Nombre, código o correo..."
+                       oninput="applyFilter()"
+                       style="width:220px;">
+            </div>
+        </div>
+
+        <p id="countLabel" style="font-size:.83rem; opacity:.55; margin-bottom:.5rem;"></p>
+
+        <div id="tableWrap">
+            <p class="ev-empty">Selecciona un evento para ver sus asistencias.</p>
+        </div>
+
+    </div>
+
+</main>
+
+<script src="/js/auth.js"></script>
+<script src="/js/view-attendances.js"></script>
+</body>
+</html>

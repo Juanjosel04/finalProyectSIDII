@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>UniPlan — Usuarios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/home-style.css">
+    <link rel="stylesheet" href="/css/events-style.css">
+</head>
+<body style="display:none;">
+
+<script>
+    (function () {
+        const token = sessionStorage.getItem("token");
+        const role  = sessionStorage.getItem("role");
+        if (!token || role !== "ADMIN") {
+            window.location.href = "/login";
+        } else {
+            document.body.style.display = "block";
+        }
+    })();
+</script>
+
+<div class="bg-image-layer"></div>
+<div class="bg-overlay-dark"></div>
+<div class="ambient-light light-1"></div>
+<div class="ambient-light light-2"></div>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/admin/home" class="nav-brand" style="text-decoration:none;">
+            <h2 class="brand-title">UniPlan</h2>
+            <img src="/images/logoIcesi.png" alt="Logo Icesi" class="nav-logo">
+        </a>
+        <div class="nav-user">
+            <a href="/admin/organizers/register" class="add-btn" style="text-decoration:none;">+ Nuevo organizador</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<main class="dashboard-container">
+
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Usuarios Registrados</h1>
+        <p class="dashboard-subtitle">Todos los usuarios de la plataforma con su información institucional</p>
+    </div>
+
+    <!-- Summary chips -->
+    <div style="display:flex; gap:.65rem; flex-wrap:wrap; margin-bottom:1.25rem;">
+        <span class="ev-chip" id="chipTotal" style="cursor:default;"></span>
+        <span class="ev-chip" id="chipStudents" style="cursor:default;color:#60a5fa;"></span>
+        <span class="ev-chip" id="chipOrganizers" style="cursor:default;color:#a78bfa;"></span>
+        <span class="ev-chip" id="chipAdmins" style="cursor:default;color:#fbbf24;"></span>
+    </div>
+
+    <div class="glass-card" style="padding:1.5rem;">
+
+        <div class="ev-toolbar">
+            <input type="text" id="searchInput" class="ev-search"
+                   placeholder="Buscar por nombre, correo o código..."
+                   oninput="applyFilter()">
+            <select id="roleFilter" class="ev-filter" onchange="applyFilter()">
+                <option value="">Todos los roles</option>
+                <option value="STUDENT">Estudiantes</option>
+                <option value="ORGANIZER">Organizadores</option>
+                <option value="ADMIN">Administradores</option>
+            </select>
+            <select id="statusFilter" class="ev-filter" onchange="applyFilter()">
+                <option value="">Todos los estados</option>
+                <option value="ACTIVE">Activos</option>
+                <option value="INACTIVE">Inactivos</option>
+            </select>
+        </div>
+
+        <p id="countLabel" style="font-size:.83rem; opacity:.55; margin:.75rem 0 .25rem;"></p>
+
+        <div id="tableWrap" style="overflow-x:auto; margin-top:.5rem;">
+            <p class="ev-empty">Cargando usuarios...</p>
+        </div>
+
+    </div>
+
+</main>
+
+<script src="/js/auth.js"></script>
+<script src="/js/admin-users.js"></script>
+</body>
+</html>

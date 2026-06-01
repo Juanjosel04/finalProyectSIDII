@@ -20,6 +20,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -488,6 +489,34 @@ public class RegistrationService {
                         .registeredAt(r.getRegisteredAt())
                         .cancelledAt(r.getCancelledAt())
                         .cancellationReason(r.getCancellationReason())
+                        .studentId(r.getStudent()        != null ? r.getStudent().getStudentId() : null)
+                        .studentFirstName(r.getStudent() != null ? r.getStudent().getFirstName() : null)
+                        .studentLastName(r.getStudent()  != null ? r.getStudent().getLastName()  : null)
+                        .studentEmail(r.getStudent()     != null ? r.getStudent().getEmail()      : null)
+                        .build()
+                )
+                .collect(Collectors.toList());
+    }
+
+    /*
+     * =========================================================
+     * GET ATTENDED REGISTRATIONS BY EVENT (ordenado más nuevo primero)
+     * =========================================================
+     */
+
+    public List<RegistrationResponse> getAttendedByEvent(String eventId) {
+        return registrationRepository
+                .findByEventIdAndStatus(eventId, "ATTENDED")
+                .stream()
+                .sorted(Comparator.comparing(
+                        r -> r.getAttendedAt() == null ? LocalDateTime.MIN : r.getAttendedAt(),
+                        Comparator.reverseOrder()
+                ))
+                .map(r -> RegistrationResponse.builder()
+                        .id(r.getId())
+                        .eventId(r.getEventId())
+                        .status(r.getStatus())
+                        .attendedAt(r.getAttendedAt())
                         .studentId(r.getStudent()        != null ? r.getStudent().getStudentId() : null)
                         .studentFirstName(r.getStudent() != null ? r.getStudent().getFirstName() : null)
                         .studentLastName(r.getStudent()  != null ? r.getStudent().getLastName()  : null)

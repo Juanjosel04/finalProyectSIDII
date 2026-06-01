@@ -93,6 +93,20 @@ public class RegistrationController {
 
     /*
      * =========================================================
+     * GET /registrations/event/{eventId}/attended
+     * Asistidos de un evento, ordenados más nuevo primero.
+     * Role: ADMIN | ORGANIZER
+     * =========================================================
+     */
+    @GetMapping("/event/{eventId}/attended")
+    public ResponseEntity<List<RegistrationResponse>> attendedByEvent(
+            @PathVariable String eventId
+    ) {
+        return ResponseEntity.ok(registrationService.getAttendedByEvent(eventId));
+    }
+
+    /*
+     * =========================================================
      * GET /registrations
      * Todas las inscripciones de la plataforma.
      * Role: ADMIN
