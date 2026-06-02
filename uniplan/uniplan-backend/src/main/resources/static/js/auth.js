@@ -329,4 +329,6 @@ function showMessage(
         success
             ? '#4ade80'
             : '#f87171';
+
+    messageBox.style.display = 'block';
 }

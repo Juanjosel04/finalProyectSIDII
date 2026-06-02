@@ -55,9 +55,11 @@ function renderTable(events) {
 }
 
 function applyFilters() {
-    const q      = document.getElementById("searchInput").value.toLowerCase();
-    const status = document.getElementById("statusFilter").value;
-    const type   = document.getElementById("typeFilter").value;
+    const q        = document.getElementById("searchInput").value.toLowerCase();
+    const status   = document.getElementById("statusFilter").value;
+    const type     = document.getElementById("typeFilter").value;
+    const dateFrom = document.getElementById("dateFrom").value;
+    const dateTo   = document.getElementById("dateTo").value;
 
     const filtered = allEvents.filter(e => {
         const matchQ = !q ||
@@ -65,7 +67,17 @@ function applyFilters() {
             (e.venue && e.venue.toLowerCase().includes(q));
         const matchStatus = !status || e.status === status;
         const matchType   = !type   || e.type   === type;
-        return matchQ && matchStatus && matchType;
+
+        let matchDate = true;
+        if (e.startDate) {
+            const d = new Date(e.startDate);
+            if (dateFrom && d < new Date(dateFrom)) matchDate = false;
+            if (dateTo   && d > new Date(dateTo + "T23:59:59")) matchDate = false;
+        } else if (dateFrom || dateTo) {
+            matchDate = false;
+        }
+
+        return matchQ && matchStatus && matchType && matchDate;
     });
     renderTable(filtered);
 }

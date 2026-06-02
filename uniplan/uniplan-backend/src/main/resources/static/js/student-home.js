@@ -79,12 +79,24 @@ function filterBySearch(query) {
 }
 
 function applyFilters() {
+    const dateFrom = document.getElementById("dateFrom")?.value;
+    const dateTo   = document.getElementById("dateTo")?.value;
+
     let filtered = allEvents;
     if (activeType) filtered = filtered.filter(e => e.type === activeType);
     if (searchQ)    filtered = filtered.filter(e =>
         (e.title && e.title.toLowerCase().includes(searchQ)) ||
         (e.venue && e.venue.toLowerCase().includes(searchQ))
     );
+    if (dateFrom || dateTo) {
+        filtered = filtered.filter(e => {
+            if (!e.startDate) return false;
+            const d = new Date(e.startDate);
+            if (dateFrom && d < new Date(dateFrom)) return false;
+            if (dateTo   && d > new Date(dateTo + "T23:59:59")) return false;
+            return true;
+        });
+    }
     renderEvents(filtered);
 }
 

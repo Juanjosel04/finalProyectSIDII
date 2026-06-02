@@ -6,6 +6,7 @@ import com.uniplan.uniplan_backend.dto.EventResponse;
 import com.uniplan.uniplan_backend.model.document.embedded.Event;
 import com.uniplan.uniplan_backend.model.document.embedded.EventCapacity;
 import com.uniplan.uniplan_backend.model.document.embedded.EventOrganizer;
+import com.uniplan.uniplan_backend.model.document.embedded.EventSchedule;
 import com.uniplan.uniplan_backend.model.relational.uniplan.User;
 import com.uniplan.uniplan_backend.repositories.EventRepository;
 import com.uniplan.uniplan_backend.repositories.UserRepository;
@@ -34,9 +35,23 @@ public class EventService {
 
     public EventResponse createEvent(CreateEventRequest request, String organizerEmail) {
 
-        // Inicializar cupos
+        // Validar cupos
         EventCapacity capacity = request.getCapacity();
-        if (capacity != null && capacity.getAvailable() == null) {
+        if (capacity == null || capacity.getTotal() == null || capacity.getTotal() <= 0) {
+            throw new IllegalArgumentException("Los cupos deben ser mayor que 0");
+        }
+
+        // Validar fechas
+        EventSchedule schedule = request.getSchedule();
+        if (schedule == null || schedule.getStartDate() == null || schedule.getEndDate() == null) {
+            throw new IllegalArgumentException("Las fechas de inicio y fin son obligatorias");
+        }
+        if (!schedule.getEndDate().isAfter(schedule.getStartDate())) {
+            throw new IllegalArgumentException("La fecha de finalización debe ser posterior a la de inicio");
+        }
+
+        // Inicializar cupos
+        if (capacity.getAvailable() == null) {
             capacity.setAvailable(capacity.getTotal());
             capacity.setRegistered(0);
             capacity.setWaitlist(0);
@@ -199,6 +214,21 @@ public class EventService {
 
     public EventResponse updateEvent(String id, CreateEventRequest request) {
 
+        // Validar cupos
+        EventCapacity newCapacity = request.getCapacity();
+        if (newCapacity == null || newCapacity.getTotal() == null || newCapacity.getTotal() <= 0) {
+            throw new IllegalArgumentException("Los cupos deben ser mayor que 0");
+        }
+
+        // Validar fechas
+        EventSchedule newSchedule = request.getSchedule();
+        if (newSchedule == null || newSchedule.getStartDate() == null || newSchedule.getEndDate() == null) {
+            throw new IllegalArgumentException("Las fechas de inicio y fin son obligatorias");
+        }
+        if (!newSchedule.getEndDate().isAfter(newSchedule.getStartDate())) {
+            throw new IllegalArgumentException("La fecha de finalización debe ser posterior a la de inicio");
+        }
+
         Event event = getEventById(id);
 
         event.setTitle(request.getTitle());
@@ -207,7 +237,10 @@ public class EventService {
         event.setSchedule(request.getSchedule());
         event.setLocation(request.getLocation());
         event.setCapacity(request.getCapacity());
-        event.setOrganizer(request.getOrganizer());
+        // Solo actualizar organizer si el request lo incluye (evita borrar el original)
+        if (request.getOrganizer() != null) {
+            event.setOrganizer(request.getOrganizer());
+        }
         event.setDetails(request.getDetails());
         event.setUpdatedAt(LocalDateTime.now());
 

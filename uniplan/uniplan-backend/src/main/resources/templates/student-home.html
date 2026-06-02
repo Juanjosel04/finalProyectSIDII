@@ -118,7 +118,7 @@
                    style="width:200px; padding:0.45rem 0.9rem;">
         </div>
 
-        <!-- Filtros -->
+        <!-- Filtros por tipo -->
         <div class="ev-chip-row">
             <button class="ev-chip active" onclick="setTypeFilter('', this)">Todos</button>
             <button class="ev-chip" onclick="setTypeFilter('ACADEMIC', this)">Académico</button>
@@ -126,6 +126,18 @@
             <button class="ev-chip" onclick="setTypeFilter('SPORT', this)">Deporte</button>
             <button class="ev-chip" onclick="setTypeFilter('VOLUNTEER', this)">Voluntariado</button>
             <button class="ev-chip" onclick="setTypeFilter('WORKSHOP', this)">Taller</button>
+        </div>
+
+        <!-- Filtros por rango de fechas -->
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:0.75rem; align-items:center;">
+            <label style="font-size:0.8rem; color:rgba(255,255,255,0.6);">Desde</label>
+            <input type="date" id="dateFrom" class="ev-input"
+                   style="padding:0.4rem 0.7rem; width:160px;"
+                   onchange="applyFilters()">
+            <label style="font-size:0.8rem; color:rgba(255,255,255,0.6);">Hasta</label>
+            <input type="date" id="dateTo" class="ev-input"
+                   style="padding:0.4rem 0.7rem; width:160px;"
+                   onchange="applyFilters()">
         </div>
 
         <!-- Grid de eventos -->
